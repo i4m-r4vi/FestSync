@@ -1,0 +1,9 @@
+{
+  _id: new ObjectId('6862939fcd8a8fe83c237239'),
+  fullname: 'ravi1',
+  email: 'demo3@gmail.com',
+  role: 'admin',
+  createdAt: 2025-06-30T13:39:43.156Z,
+  updatedAt: 2025-06-30T13:39:43.156Z,
+  __v: 0
+}
