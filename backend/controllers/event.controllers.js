@@ -1,21 +1,78 @@
 import EventModel from "../models/event.models.js";
+import cloudinary from "cloudinary"
 
-export const eventCreation = async (req, res) => {
+export const eventRegistration = async (req, res) => {
     try {
-        const { title, description, department, postureImg, createdBy } = req.body;
+        const { title, description, department, postureImg } = req.body;
         const users = req.user;
-        if (users.role == 'student') {
+        if (users.role === "student") {
             return res.status(400).json({ error: "Student Cannot Create Event" })
         }
-        if (!title || !description || !department) {
+        if (!title || !description || !department || !postureImg) {
             return res.status(400).json({ error: "Please enter the title, description, and department." });
         }
-        const newEvent = new EventModel({ title, description, department, postureImg, createdBy:users.fullname });
+        let imageUrl = ''
+        if (postureImg) {
+            const result = await cloudinary.uploader.upload(postureImg);
+            imageUrl = result.secure_url;
+        }
+        const newEvent = new EventModel({ title, description, department, postureImg: imageUrl, createdBy: users.fullname });
         await newEvent.save();
         res.status(200).json({ message: "Successfully Created Event" })
     } catch (error) {
         console.log(`Error in eventRegistration : ${error}`);
         res.status(500).json({ error: "Internal Server Error" })
     }
-
 }
+
+export const getAllEvents = async (req, res) => {
+    try {
+        const getEvents = await EventModel.find().sort({ createdAt: -1 });
+        if (!getEvents) {
+            return res.status(400).json({ error: "Failed to Get Events" })
+        }
+        res.status(200).json({ Events: getEvents });
+    } catch (error) {
+        console.log(`Error in getAllEvents : ${error}`);
+        res.status(500).json({ error: "Internal Server Error" })
+    }
+}
+export const deleteEvent = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = req.user;
+        if (user.role === "student") {
+            return res.status(403).json({ error: "Students are not allowed to delete events." });
+        }
+        const deletedEvent = await EventModel.findByIdAndDelete({ _id: id });
+        if (!deletedEvent) {
+            return res.status(400).json({ error: "Event not found or already deleted." });
+        }
+        res.status(200).json({ message: "Event deleted successfully." });
+    } catch (error) {
+        console.error(`Error in deleteEvent: ${error}`);
+        res.status(500).json({ error: "Internal server error." });
+    }
+};
+export const updateEvent = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = req.user;
+        const { title, description, department, postureImg } = req.body;
+        if (user.role === "student") {
+            return res.status(403).json({ error: "Students are not allowed to delete events." });
+        }
+        const updateEvents = await EventModel.findById({ _id: id });
+        if (!updateEvents) {
+            return res.status(400).json({ error: "Event not found." });
+        }
+        const updatedEvent = await EventModel.updateOne({ title, description, department, postureImg });
+        if (!updatedEvent) {
+            return res.status(400).json({ error: "Event not Updated." });
+        }
+        res.status(200).json({ message: "Event updated successfully." });
+    } catch (error) {
+        console.error(`Error in updateEvent: ${error}`);
+        res.status(500).json({ error: "Internal server error." });
+    }
+};
