@@ -54,6 +54,24 @@ export const deleteEvent = async (req, res) => {
         res.status(500).json({ error: "Internal server error." });
     }
 };
+
+export const getUpdateEvent = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = req.user;
+        if (user.role === "student") {
+            return res.status(403).json({ error: "Students are not allowed to get events." });
+        }
+        const getEvent = await EventModel.findOne({_id:id});
+        if(!getEvent){
+            return res.status(403).json({ error: "Events not Found or Deleted" });
+        }
+        res.status(200).json({event:getEvent});
+    } catch (error) {
+        console.error(`Error in getUpdateEvent: ${error}`);
+        res.status(500).json({ error: "Internal server error." });
+    }
+}
 export const updateEvent = async (req, res) => {
     try {
         const { id } = req.params;
@@ -66,6 +84,9 @@ export const updateEvent = async (req, res) => {
         if (!updateEvents) {
             return res.status(400).json({ error: "Event not found." });
         }
+        if (!title || !description || !department) {
+            return res.status(400).json({ error: "Please Enter Title , Description ,Department" });
+        }
         const updatedEvent = await EventModel.updateOne({ title, description, department, postureImg });
         if (!updatedEvent) {
             return res.status(400).json({ error: "Event not Updated." });
@@ -76,3 +97,5 @@ export const updateEvent = async (req, res) => {
         res.status(500).json({ error: "Internal server error." });
     }
 };
+
+
