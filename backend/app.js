@@ -6,6 +6,8 @@ import authRoutes from './routes/auth.routes.js';
 import cookieParser from 'cookie-parser';
 import EventRoutes from './routes/event.routes.js';
 import cloudinary from 'cloudinary'
+import userRegRoutes from './routes/payment.routes.js';
+import paymentRoutes from './routes/payment.routes.js';
 
 dotenv.config();
 
@@ -24,6 +26,7 @@ app.use(bodyParser.urlencoded({ extended: true,limit:'5mb'}));
 app.use(cookieParser());
 app.use('/api/auth',authRoutes)
 app.use('/api/events',EventRoutes)
+app.use('/api/payment',paymentRoutes)
 
 
 

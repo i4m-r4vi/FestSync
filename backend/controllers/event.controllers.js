@@ -3,20 +3,20 @@ import cloudinary from "cloudinary"
 
 export const eventRegistration = async (req, res) => {
     try {
-        const { title, description, department, postureImg } = req.body;
+        const { title, description, department, postureImg, EventDate, amount } = req.body;
         const users = req.user;
         if (users.role === "student") {
             return res.status(400).json({ error: "Student Cannot Create Event" })
         }
-        if (!title || !description || !department || !postureImg) {
-            return res.status(400).json({ error: "Please enter the title, description, and department." });
+        if (!title || !description || !department || !EventDate || !amount) {
+            return res.status(400).json({ error: "Please enter the title, description, department,eventdate and amount" });
         }
         let imageUrl = ''
         if (postureImg) {
             const result = await cloudinary.uploader.upload(postureImg);
             imageUrl = result.secure_url;
         }
-        const newEvent = new EventModel({ title, description, department, postureImg: imageUrl, createdBy: users.fullname });
+        const newEvent = new EventModel({ title, description, department, EventDate, postureImg: imageUrl, createdBy: users.fullname, amount });
         await newEvent.save();
         res.status(200).json({ message: "Successfully Created Event" })
     } catch (error) {
@@ -28,6 +28,22 @@ export const eventRegistration = async (req, res) => {
 export const getAllEvents = async (req, res) => {
     try {
         const getEvents = await EventModel.find().sort({ createdAt: -1 });
+        if (!getEvents) {
+            return res.status(400).json({ error: "Failed to Get Events" })
+        }
+        res.status(200).json({ Events: getEvents });
+    } catch (error) {
+        console.log(`Error in getAllEvents : ${error}`);
+        res.status(500).json({ error: "Internal Server Error" })
+    }
+}
+export const getOneEvent = async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (user.role === "student") {
+            return res.status(403).json({ error: "Please SignIn" });
+        }
+        const getEvents = await EventModel.findById({ _id: id });
         if (!getEvents) {
             return res.status(400).json({ error: "Failed to Get Events" })
         }
@@ -62,11 +78,11 @@ export const getUpdateEvent = async (req, res) => {
         if (user.role === "student") {
             return res.status(403).json({ error: "Students are not allowed to get events." });
         }
-        const getEvent = await EventModel.findOne({_id:id});
-        if(!getEvent){
+        const getEvent = await EventModel.findOne({ _id: id });
+        if (!getEvent) {
             return res.status(403).json({ error: "Events not Found or Deleted" });
         }
-        res.status(200).json({event:getEvent});
+        res.status(200).json({ event: getEvent });
     } catch (error) {
         console.error(`Error in getUpdateEvent: ${error}`);
         res.status(500).json({ error: "Internal server error." });
@@ -76,7 +92,7 @@ export const updateEvent = async (req, res) => {
     try {
         const { id } = req.params;
         const user = req.user;
-        const { title, description, department, postureImg } = req.body;
+        const { title, description, department, postureImg, amount } = req.body;
         if (user.role === "student") {
             return res.status(403).json({ error: "Students are not allowed to delete events." });
         }
@@ -84,10 +100,10 @@ export const updateEvent = async (req, res) => {
         if (!updateEvents) {
             return res.status(400).json({ error: "Event not found." });
         }
-        if (!title || !description || !department) {
+        if (!title || !description || !department || !amount) {
             return res.status(400).json({ error: "Please Enter Title , Description ,Department" });
         }
-        const updatedEvent = await EventModel.updateOne({ title, description, department, postureImg });
+        const updatedEvent = await EventModel.updateOne({ title, description, department, postureImg, amount });
         if (!updatedEvent) {
             return res.status(400).json({ error: "Event not Updated." });
         }
