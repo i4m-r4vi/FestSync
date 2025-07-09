@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon app.js"
+    "dev:css": "tailwindcss -i ./input.css -o ./public/css/style.css --watch",
+    "dev:server": "nodemon app.js",
+    "start": "concurrently \"npm run dev:css\" \"npm run dev:server\"" 
   },
   "author": "",
   "license": "ISC",
@@ -15,9 +17,11 @@
     "bcryptjs": "^3.0.2",
     "body-parser": "^2.2.0",
     "cloudinary": "^2.7.0",
+    "concurrently": "^9.2.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.6.0",
+    "ejs": "^3.1.10",
     "express": "^5.1.0",
     "express-session": "^1.18.1",
     "jsonwebtoken": "^9.0.2",
@@ -28,5 +32,10 @@
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "stripe": "^18.3.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17"
   }
 }

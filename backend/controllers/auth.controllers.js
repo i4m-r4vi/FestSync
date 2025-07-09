@@ -6,7 +6,7 @@ import nodemailer from 'nodemailer'
 
 export const signup = async (req, res) => {
     try {
-        const { fullname, email, password, role, registred,clgName } = req.body;
+        const { fullname, email, password, role,clgName } = req.body;
         if (!fullname || !email || !password ||!clgName) {
             return res.status(400).json({ error: "Please provide all required details." })
         }
@@ -19,7 +19,7 @@ export const signup = async (req, res) => {
             return res.status(400).json({ error: "Existing Email" })
         }
         const hash = await bcrypt.hash(password, 10)
-        const newUser = new UserAuth({ fullname, email, password: hash, role, registred,clgName });
+        const newUser = new UserAuth({ fullname, email, password: hash, role,clgName });
         if (!newUser) {
             return res.status(400).json({ error: "User Did not Created Error Occured" })
         }

@@ -27,12 +27,24 @@ app.use(cookieParser());
 app.use('/api/auth',authRoutes)
 app.use('/api/events',EventRoutes)
 app.use('/api/payment',paymentRoutes)
+app.set('view engine','ejs')
+app.use(express.static('public'))
 
 
 
 app.get('/', (req, res) => {
     res.status(200).json({ message: 'App is working' });
 });
+
+
+app.get('/admin-register',(req,res)=>{
+    try {
+        res.render('signup')
+    } catch (error) {
+        console.error(`Error in loginEjs: ${error}`);
+        res.status(500).json({ error: "Internal server error." });
+    }
+})
 
 const PORT = process.env.PORT || 5000;
 
