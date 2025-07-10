@@ -68,7 +68,7 @@ export const forgotPassowrdRequest = async (req, res) => {
         const user = await UserAuth.findOne({ email }).select('-password');
         const secret = user._id + process.env.jwtsecret;
         const token = jwt.sign({ id: user._id, email: user.email, fullname: user.fullname }, secret, {
-            expiresIn: '1d'
+            expiresIn: '5m'
         })
         const resetUrl = `http://127.0.0.1:5000/api/auth/forgotPassword/${user._id}/${token}`
         const transporter = await nodemailer.createTransport({
@@ -89,7 +89,7 @@ export const forgotPassowrdRequest = async (req, res) => {
       <h2 style="color: #333;">Password Reset Request</h2>
       <p>Hello ${user.fullname || 'User'},</p>
       <p>You are receiving this email because you (or someone else) requested a password reset for your account.</p>
-      <p>Please click the button below to reset your password. This link will expire in 10 minutes.</p>
+      <p>Please click the button below to reset your password. This link will expire in 5 minutes.</p>
       <p style="text-align: center;">
         <a href="${resetUrl}" style="display: inline-block; padding: 12px 20px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 5px;">Reset Password</a>
       </p>
@@ -130,6 +130,23 @@ export const updatePassowrd = async (req, res) => {
         res.status(200).json({ message: "Password Successfully Changed" })
     } catch (error) {
         console.error("Error occurred during ForgotPasswordRequest:", error);
+        res.status(500).json({ message: "Internal server error." });
+    }
+}
+
+export const getForgotPassword = async(req,res)=>{
+    try {
+        const { id, token } = req.params;
+        const user = await UserAuth.findOne({ _id: id })
+        const secret = user._id + process.env.jwtsecret;
+        try {
+            jwt.verify(token, secret)
+        } catch (error) {
+            return res.status(404).json({ message: "Invalid Token" })
+        }
+        res.render('forgot-password.ejs')
+    } catch (error) {
+        console.error("Error occurred during getForgotPassword:", error);
         res.status(500).json({ message: "Internal server error." });
     }
 }

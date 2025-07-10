@@ -6,7 +6,6 @@ import authRoutes from './routes/auth.routes.js';
 import cookieParser from 'cookie-parser';
 import EventRoutes from './routes/event.routes.js';
 import cloudinary from 'cloudinary'
-import userRegRoutes from './routes/payment.routes.js';
 import paymentRoutes from './routes/payment.routes.js';
 
 dotenv.config();
@@ -30,20 +29,12 @@ app.use('/api/payment',paymentRoutes)
 app.set('view engine','ejs')
 app.use(express.static('public'))
 
-
-
 app.get('/', (req, res) => {
     res.status(200).json({ message: 'App is working' });
 });
 
-
 app.get('/admin-register',(req,res)=>{
-    try {
-        res.render('signup')
-    } catch (error) {
-        console.error(`Error in loginEjs: ${error}`);
-        res.status(500).json({ error: "Internal server error." });
-    }
+    res.render('signup');
 })
 
 const PORT = process.env.PORT || 5000;
