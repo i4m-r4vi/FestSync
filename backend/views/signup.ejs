@@ -33,6 +33,10 @@
                     <input type="password" id="password" name="password"
                         class="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2.5 "
                         placeholder="Password" required />
+                    <div class="mt-2 flex gap-2">
+                        <input type="checkbox" class="w-2" id="show">
+                        <label for="show">Show Password</label>
+                    </div>
                 </div>
                 <div class="mb-5">
                     <label for="Role" class=" mb-2 text-sm font-medium text-gray-900">Your
@@ -61,5 +65,12 @@
         </div>
     </div>
 </body>
+<script>
+    const showCheckbox = document.getElementById("show");
+    const passwordInput = document.getElementById("password");
 
+    showCheckbox.addEventListener("click", () => {
+        passwordInput.type = showCheckbox.checked ? "text" : "password";
+    });
+</script>
 </html>

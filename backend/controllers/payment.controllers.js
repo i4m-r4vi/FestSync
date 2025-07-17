@@ -9,30 +9,42 @@ const stripe = new Stripe(process.env.Stripe_Secret_key);
 
 export const createPaymentIntent = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { id: regEvent } = req.params;
         const user = req.user;
         if (!user) {
             res.status(401).json({ Unauthorized: "Please login first." })
         }
-        if (!id) {
+        if (!regEvent) {
             return res.status(404).json({ error: "EventId Not Found." });
         }
-        const getEvent = await EventModel.findById(id);
+        const getEvent = await EventModel.findById(regEvent);
         if (!getEvent) {
             return res.status(404).json({ error: "Event not found." });
         }
         const amount = getEvent.amount * 100;
 
-        const paymentIntent = await stripe.paymentIntents.create({
-            amount,
-            currency: "inr",
-            automatic_payment_methods: { enabled: true },
-            metadata: {
-                userId: user._id.toString(),
-                eventId: id,
-            },
-        });
-        res.status(200).json({ clientSecret: paymentIntent.client_secret });
+        // const paymentIntent = await stripe.paymentIntents.create({
+        //     amount,
+        //     currency: "inr",
+        //     automatic_payment_methods: { enabled: true },
+        //     metadata: {
+        //         userId: user._id.toString(),
+        //         eventId: id,
+        //     },
+        // });
+        const userReg = await UserAuth.findById({_id:user._id});
+        
+        if(!userReg){
+          return res.status(404).json({ error: "Invalid UserId" });
+        }
+        if(userReg.registeredEvents.toString() === regEvent){
+          return res.status(404).json({ error: "You Already Registered for the event" });
+        }
+        await userReg.registeredEvents.push(regEvent)
+        await getEvent.registeredUsers.push(user._id)
+        await getEvent.save()
+        await userReg.save()
+        res.status(200).json({ message:"Registered for the event successfully" });
     } catch (error) {
         console.error(`Error in createPayment: ${error}`);
         res.status(500).json({ error: "Internal server error." });

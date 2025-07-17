@@ -6,8 +6,8 @@ import nodemailer from 'nodemailer'
 
 export const signup = async (req, res) => {
     try {
-        const { fullname, email, password, role,clgName } = req.body;
-        if (!fullname || !email || !password ||!clgName) {
+        const { fullname, email, password, role, clgName } = req.body;
+        if (!fullname || !email || !password || !clgName) {
             return res.status(400).json({ error: "Please provide all required details." })
         }
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -19,7 +19,7 @@ export const signup = async (req, res) => {
             return res.status(400).json({ error: "Existing Email" })
         }
         const hash = await bcrypt.hash(password, 10)
-        const newUser = new UserAuth({ fullname, email, password: hash, role,clgName });
+        const newUser = new UserAuth({ fullname, email, password: hash, role, clgName });
         if (!newUser) {
             return res.status(400).json({ error: "User Did not Created Error Occured" })
         }
@@ -68,7 +68,7 @@ export const forgotPassowrdRequest = async (req, res) => {
         const user = await UserAuth.findOne({ email }).select('-password');
         const secret = user._id + process.env.jwtsecret;
         const token = jwt.sign({ id: user._id, email: user.email, fullname: user.fullname }, secret, {
-            expiresIn: '5m'
+            expiresIn: '10m'
         })
         const resetUrl = `http://127.0.0.1:5000/api/auth/forgotPassword/${user._id}/${token}`
         const transporter = await nodemailer.createTransport({
@@ -134,7 +134,7 @@ export const updatePassowrd = async (req, res) => {
     }
 }
 
-export const getForgotPassword = async(req,res)=>{
+export const getForgotPassword = async (req, res) => {
     try {
         const { id, token } = req.params;
         const user = await UserAuth.findOne({ _id: id })
@@ -161,6 +161,19 @@ export const logout = async (req, res) => {
         res.status(200).json({ message: 'Logged out successfully' });
     } catch (error) {
         console.error("Error occurred during Logout:", error);
+        res.status(500).json({ message: "Internal server error." });
+    }
+}
+
+export const getUserInfo = async (req, res) => {
+    try {
+        const user = await UserAuth.findById(req.user._id).populate({ path: "registeredEvents",select:["-registeredUsers","-updatedAt","-createdAt"]});
+        if (!user) {
+            return res.status(400).json({ message: "user did not found" });
+        }
+        res.status(200).json({ userInfo: user })
+    } catch (error) {
+        console.error("Error occurred during getUserInfo:", error);
         res.status(500).json({ message: "Internal server error." });
     }
 }

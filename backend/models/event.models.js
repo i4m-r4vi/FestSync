@@ -31,6 +31,10 @@ const EventSchema = new mongoose.Schema({
     registeredUsers: [{ 
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'UserAuth',
+    }],
+    SubEvents:[{
+        type:String,
+        required:true
     }]
 }, { timestamps: true })
 

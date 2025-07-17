@@ -3,12 +3,12 @@ import cloudinary from "cloudinary"
 
 export const eventRegistration = async (req, res) => {
     try {
-        const { title, description, department, postureImg, EventDate, amount } = req.body;
+        const { title, description,SubEvents, department, postureImg, EventDate, amount } = req.body;
         const users = req.user;
         if (users.role === "student") {
             return res.status(400).json({ error: "Student Cannot Create Event" })
         }
-        if (!title || !description || !department || !EventDate || !amount) {
+        if (!title || !description || !department || !EventDate || !amount || !SubEvents) {
             return res.status(400).json({ error: "Please enter the title, description, department,eventdate and amount" });
         }
         let imageUrl = ''
@@ -16,7 +16,8 @@ export const eventRegistration = async (req, res) => {
             const result = await cloudinary.uploader.upload(postureImg);
             imageUrl = result.secure_url;
         }
-        const newEvent = new EventModel({ title, description, department, EventDate, postureImg: imageUrl, createdBy: users.fullname, amount });
+        const subEvent = JSON.stringify(SubEvents)
+        const newEvent = new EventModel({ title, description, department, EventDate, postureImg: imageUrl, createdBy: users.fullname, amount,SubEvents:subEvent });
         await newEvent.save();
         res.status(200).json({ message: "Successfully Created Event" })
     } catch (error) {

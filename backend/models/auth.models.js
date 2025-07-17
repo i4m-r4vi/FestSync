@@ -27,7 +27,7 @@ const UserSchema = new mongoose.Schema({
     },
     registeredEvents: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'EventModel',
+        ref: 'Events',
     }]
 }, { timestamps: true })
 

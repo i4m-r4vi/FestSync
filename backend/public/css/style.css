@@ -572,6 +572,10 @@ video {
   margin-bottom: 1.25rem;
 }
 
+.mt-2 {
+  margin-top: 0.5rem;
+}
+
 .mt-4 {
   margin-top: 1rem;
 }
@@ -595,6 +599,10 @@ video {
 
 .h-screen {
   height: 100vh;
+}
+
+.w-2 {
+  width: 0.5rem;
 }
 
 .w-3\/4 {
