@@ -28,13 +28,34 @@ const EventSchema = new mongoose.Schema({
     amount: {
         type: Number
     },
-    registeredUsers: [{ 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'UserAuth',
+    registeredUsers: [{
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'UserAuth',
+            required: true,
+            unique: true 
+        },
+        name: String,
+        eventName:{
+            type:String,
+            required:true
+        },
+        mail:{
+            type:String,
+            required:true
+        },
+        subEvent: {
+            type: String,
+            required: true
+        },
+        eventDate: {
+            type:String,
+            required:true
+        }
     }],
-    SubEvents:[{
-        type:String,
-        required:true
+    SubEvents: [{
+        type: String,
+        required: true
     }]
 }, { timestamps: true })
 

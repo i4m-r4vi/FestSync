@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 import EventRoutes from './routes/event.routes.js';
 import cloudinary from 'cloudinary'
 import paymentRoutes from './routes/payment.routes.js';
+import certificateRoutes from './routes/certificate.routes.js';
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.use(cookieParser());
 app.use('/api/auth',authRoutes)
 app.use('/api/events',EventRoutes)
 app.use('/api/payment',paymentRoutes)
+app.use('/api/certificate',certificateRoutes)
 app.set('view engine','ejs')
 app.use(express.static('public'))
 

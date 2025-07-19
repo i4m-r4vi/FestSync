@@ -167,7 +167,7 @@ export const logout = async (req, res) => {
 
 export const getUserInfo = async (req, res) => {
     try {
-        const user = await UserAuth.findById(req.user._id).populate({ path: "registeredEvents",select:["-registeredUsers","-updatedAt","-createdAt"]});
+        const user = await UserAuth.findById(req.user._id).select("-password").populate({ path: "registeredEvents",select:["-registeredUsers","-updatedAt","-createdAt","-password"]});
         if (!user) {
             return res.status(400).json({ message: "user did not found" });
         }

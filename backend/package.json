@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev:css": "tailwindcss -i ./input.css -o ./public/css/style.css --watch",
     "dev:server": "nodemon app.js",
-    "start": "concurrently \"npm run dev:css\" \"npm run dev:server\"" 
+    "start": "concurrently \"npm run dev:css\" \"npm run dev:server\""
   },
   "author": "",
   "license": "ISC",
@@ -31,6 +31,8 @@
     "nodemon": "^3.1.10",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
+    "pdf-lib": "^1.17.1",
+    "pdfkit": "^0.17.1",
     "stripe": "^18.3.0"
   },
   "devDependencies": {

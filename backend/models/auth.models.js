@@ -25,10 +25,26 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    registeredEvents: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Events',
-    }]
+    registeredEvents:[{
+            eventId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Events',
+                required: true,
+                unique: true 
+            },
+            eventName:{
+                type:String,
+                required:true
+            },
+            subEvent: {
+                type: String,
+                required: true
+            },
+            eventDate: {
+                type:Date,
+                required:true
+            }
+        }],
 }, { timestamps: true })
 
 const UserAuth = mongoose.model("UserAuth", UserSchema);
