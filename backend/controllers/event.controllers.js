@@ -16,7 +16,7 @@ export const eventRegistration = async (req, res) => {
             const result = await cloudinary.uploader.upload(postureImg);
             imageUrl = result.secure_url;
         }
-        const subEvent = JSON.stringify(SubEvents)
+        const subEvent = JSON.parse(SubEvents);
         const newEvent = new EventModel({ title, description, department, EventDate, postureImg: imageUrl, createdBy: users.fullname, amount,SubEvents:subEvent });
         await newEvent.save();
         res.status(200).json({ message: "Successfully Created Event" })
@@ -61,10 +61,16 @@ export const deleteEvent = async (req, res) => {
         if (user.role === "student") {
             return res.status(403).json({ error: "Students are not allowed to delete events." });
         }
-        const deletedEvent = await EventModel.findByIdAndDelete({ _id: id });
-        if (!deletedEvent) {
+        const deleteEvents = await EventModel.findById({ _id: id });
+
+        if (!deleteEvents) {
             return res.status(400).json({ error: "Event not found or already deleted." });
         }
+        if(deleteEvents.postureImg){
+            const postureImg = deleteEvents.postureImg.toString().split("/").pop().split(".")[0]
+            await cloudinary.uploader.destroy(postureImg)
+        }
+        await EventModel.findByIdAndDelete({_id:id});
         res.status(200).json({ message: "Event deleted successfully." });
     } catch (error) {
         console.error(`Error in deleteEvent: ${error}`);
@@ -93,7 +99,7 @@ export const updateEvent = async (req, res) => {
     try {
         const { id } = req.params;
         const user = req.user;
-        const { title, description, department, postureImg, amount } = req.body;
+        const { title, description, department, postureImg, amount,EventDate,SubEvents } = req.body;
         if (user.role === "student") {
             return res.status(403).json({ error: "Students are not allowed to delete events." });
         }
@@ -101,13 +107,15 @@ export const updateEvent = async (req, res) => {
         if (!updateEvents) {
             return res.status(400).json({ error: "Event not found." });
         }
-        if (!title || !description || !department || !amount) {
-            return res.status(400).json({ error: "Please Enter Title , Description ,Department" });
-        }
-        const updatedEvent = await EventModel.updateOne({ title, description, department, postureImg, amount });
-        if (!updatedEvent) {
-            return res.status(400).json({ error: "Event not Updated." });
-        }
+        updateEvents.title = title || updateEvents.title,
+        updateEvents.description = description || updateEvents.description,
+        updateEvents.department = department || updateEvents.department,
+        updateEvents.postureImg = postureImg || updateEvents.postureImg,
+        updateEvents.amount = amount || updateEvents.amount,
+        updateEvents.EventDate = EventDate || updateEvents.EventDate,
+        updateEvents.SubEvents = SubEvents || updateEvents.SubEvents,
+
+        await updateEvents.save();
         res.status(200).json({ message: "Event updated successfully." });
     } catch (error) {
         console.error(`Error in updateEvent: ${error}`);

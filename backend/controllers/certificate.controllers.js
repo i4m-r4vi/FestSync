@@ -23,7 +23,7 @@ export const generateCertificate = async (req, res) => {
                 doc.registerFont('poppins', path.join(__dirname, '..', 'fonts', 'poppins.ttf'));
                 doc.registerFont('roboto', path.join(__dirname, '..', 'fonts', 'roboto.ttf'));
                 const fileName = `certificate_${ele.name.replace(/\s/g, "_")}.pdf`;
-                const filePath = path.join(__dirname, "..", "output", fileName);
+                const filePath = path.join(__dirname, "..", "cert-output", fileName);
 
                 const bgImage = "Sample_Certificate.png";
                 doc.image(path.join(__dirname, "..", "certificate", bgImage), 0, 0, {

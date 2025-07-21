@@ -32,8 +32,8 @@ const EventSchema = new mongoose.Schema({
         userId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'UserAuth',
-            required: true,
-            unique: true 
+            unique: true,
+            required:true
         },
         name: String,
         eventName:{
@@ -46,7 +46,7 @@ const EventSchema = new mongoose.Schema({
         },
         subEvent: {
             type: String,
-            required: true
+            required:true
         },
         eventDate: {
             type:String,
