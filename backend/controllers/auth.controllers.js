@@ -41,12 +41,16 @@ export const signin = async (req, res) => {
         if (!user) {
             return res.status(400).json({ message: "email not found. Please sign up." });
         }
-        const matched = await bcrypt.compare(password, user.password);
-        if (!matched) {
+        if (!password) {
+            return res.status(400).json({ error: "Password is required" });
+        }
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
             return res.status(400).json({ error: "Invalid Password" })
         }
+        const { password: _, ...safeUser } = user.toObject();
         await generateWebToken(user._id, res)
-        res.status(200).json({ message: "Successfully signIn" });
+        res.status(200).json({ message: "Successfully signIn", user: safeUser });
     } catch (error) {
         console.log(`Error in signIn : ${error}`);
         res.status(500).json({ error: "Internal Server Error" })
@@ -167,7 +171,7 @@ export const logout = async (req, res) => {
 
 export const getUserInfo = async (req, res) => {
     try {
-        const user = await UserAuth.findById(req.user._id).select("-password").populate({ path: "registeredEvents",select:["-registeredUsers","-updatedAt","-createdAt","-password"]});
+        const user = await UserAuth.findById(req.user._id).select("-password").populate({ path: "registeredEvents", select: ["-registeredUsers", "-updatedAt", "-createdAt", "-password"] });
         if (!user) {
             return res.status(400).json({ message: "user did not found" });
         }

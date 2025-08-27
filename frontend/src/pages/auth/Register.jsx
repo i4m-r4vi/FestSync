@@ -1,6 +1,6 @@
 // src/pages/auth/Register.js
 import { useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
 import useAuth from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
@@ -24,7 +24,7 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post("/api/auth/signup", form);
+      const { data } = await axiosInstance.post("/auth/signup", form);
 
       login({ ...data.user, token: data.token });
 

@@ -3,10 +3,11 @@ import axios from "axios";
 
 // Create instance
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:5000/api", // ✅ Change this to your backend URL
+  baseURL: import.meta.env.VITE_APP_BACKEND, // ✅ Change this to your backend URL
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true,
 });
 
 // Add token to every request if available

@@ -1,6 +1,6 @@
 // src/pages/auth/Login.js
 import { useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
 import useAuth from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
@@ -9,6 +9,7 @@ export default function Login() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({ email: "", password: "" });
+  console.log(form);
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
@@ -18,8 +19,7 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post("/api/auth/login", form);
-
+      const { data } = await axiosInstance.post("/auth/signin", form);
       // Backend should return { token, user: { fullname, email, role, clgName } }
       login({ ...data.user, token: data.token });
 

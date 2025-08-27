@@ -8,6 +8,7 @@ import EventRoutes from './routes/event.routes.js';
 import cloudinary from 'cloudinary'
 import paymentRoutes from './routes/payment.routes.js';
 import certificateRoutes from './routes/certificate.routes.js';
+import cors from 'cors';
 
 dotenv.config();
 
@@ -19,7 +20,14 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_SECRET
 })
 
+
+app.use(cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+}))
+
 app.use(express.json({
+    extended:true,
     limit:'5mb',
 }))
 app.use(bodyParser.urlencoded({ extended: true,limit:'5mb'}));

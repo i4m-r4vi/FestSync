@@ -1,64 +1,59 @@
 import mongoose from "mongoose";
 
 const EventSchema = new mongoose.Schema({
-    title: {
-        type: String,
-        required: true
+    title: { 
+        type: String, 
+        required: true 
     },
-    description: {
-        type: String,
-        required: true
+    description: { 
+        type: String, 
+        required: true 
     },
-    department: {
-        type: String,
-        required: true
+    department: { 
+        type: String, 
+        required: true 
     },
-    postureImg: {
-        type: Array,
-        default: []
+    postureImg: { 
+        type: String, 
+        default: '' },
+    EventDate: { 
+        type: String, 
+        required: true 
     },
-    EventDate: {
-        type: String,
-        required: true
+    createdBy: { 
+        type: String, 
+        default: 'admin' 
     },
-    createdBy: {
-        type: String,
-        default: 'admin'
+    amount: { 
+        type: Number 
     },
-    amount: {
-        type: Number
-    },
+
     registeredUsers: [{
         userId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'UserAuth',
-            unique: true,
-            required:true
+            required: true
         },
         name: String,
-        eventName:{
-            type:String,
-            required:true
-        },
-        mail:{
-            type:String,
-            required:true
-        },
-        subEvent: {
-            type: String,
-            required:true
-        },
-        eventDate: {
-            type:String,
-            required:true
-        }
+        eventName: { type: String, required: true },
+        mail: { type: String, required: true },
+        subEvent: { type: String, required: true },
+        eventDate: { type: String, required: true }
     }],
-    SubEvents: [{
-        type: String,
-        required: true
-    }]
-}, { timestamps: true })
 
-const EventModel = mongoose.model('Events', EventSchema);
+    SubEvents: [{ type: String, required: true }]
+}, { timestamps: true });
 
-export default EventModel
+/**
+ * ✅ Add compound unique index:
+ * Ensures each (eventId, userId) pair is unique.
+ * A user can register only once per event.
+ */
+EventSchema.index(
+    { _id: 1, "registeredUsers.userId": 1 },
+    { unique: true, partialFilterExpression: { "registeredUsers.userId": { $type: "objectId" } } }
+);
+
+const EventModel = mongoose.model("Events", EventSchema);
+
+export default EventModel;

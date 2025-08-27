@@ -5,19 +5,20 @@ export const eventRegistration = async (req, res) => {
     try {
         const { title, description,SubEvents, department, postureImg, EventDate, amount } = req.body;
         const users = req.user;
+        
         if (users.role === "student") {
             return res.status(400).json({ error: "Student Cannot Create Event" })
         }
-        if (!title || !description || !department || !EventDate || !amount || !SubEvents) {
-            return res.status(400).json({ error: "Please enter the title, description, department,eventdate and amount" });
+        if (!title || !description || !department || !EventDate || !amount || !SubEvents || !postureImg) {
+            return res.status(400).json({ error: "Please enter the title, description, department,eventdate,postureImg and amount" });
         }
-        let imageUrl = ''
+        var imageUrl = ''
         if (postureImg) {
-            const result = await cloudinary.uploader.upload(postureImg);
+            const result = await cloudinary.uploader.upload(postureImg)
             imageUrl = result.secure_url;
         }
-        const subEvent = JSON.parse(SubEvents);
-        const newEvent = new EventModel({ title, description, department, EventDate, postureImg: imageUrl, createdBy: users.fullname, amount,SubEvents:subEvent });
+        
+        const newEvent = new EventModel({ title, description, department, EventDate, postureImg:imageUrl, createdBy: users.fullname, amount,SubEvents });
         await newEvent.save();
         res.status(200).json({ message: "Successfully Created Event" })
     } catch (error) {
@@ -32,7 +33,7 @@ export const getAllEvents = async (req, res) => {
         if (!getEvents) {
             return res.status(400).json({ error: "Failed to Get Events" })
         }
-        res.status(200).json({ Events: getEvents });
+        res.status(200).json({ getEvents });
     } catch (error) {
         console.log(`Error in getAllEvents : ${error}`);
         res.status(500).json({ error: "Internal Server Error" })
@@ -62,7 +63,6 @@ export const deleteEvent = async (req, res) => {
             return res.status(403).json({ error: "Students are not allowed to delete events." });
         }
         const deleteEvents = await EventModel.findById({ _id: id });
-
         if (!deleteEvents) {
             return res.status(400).json({ error: "Event not found or already deleted." });
         }
