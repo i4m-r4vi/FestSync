@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
@@ -7,43 +7,150 @@ import Profile from "./pages/student/Profile";
 import Participants from "./pages/admin/Participants";
 import Settings from "./pages/admin/Settings";
 import AdminCertificates from "./pages/admin/AdminCertificates";
-import ProtectedRoute from "./components/ProtectedRoute";
 import Events from "./pages/admin/Events";
 import { Elements } from "@stripe/react-stripe-js";
-import StudentEvents from "./pages/student/Events"
+import StudentEvents from "./pages/student/Events";
 import { loadStripe } from "@stripe/stripe-js";
-import "./App.css"
+import "./App.css";
 import PaymentSuccess from "./pages/PaymentSuccess";
-import PublicRoute from "./components/PublicRoute";
+import { useQuery } from "@tanstack/react-query";
+import { Loader2Icon } from "lucide-react";
+import axiosInstance from "./utils/axiosInstance"; // ✅ cookie-based axios
 
 const stripePromise = loadStripe(import.meta.env.VITE_Stripe_Publishable_key);
 
 function App() {
+  // ✅ Check session from backend
+  const { data: authUser, isLoading } = useQuery({
+    queryKey: ["authUser"],
+    queryFn: async () => {
+      try {
+        const res = await axiosInstance.get("/auth/profile");
+        return res.data.userInfo; // { fullname, email, role }
+      } catch (error) {
+        return null;
+      }
+    },
+    retry: false,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2Icon className="animate-spin w-6 h-6" />
+      </div>
+    );
+  }
+
   return (
     <Elements stripe={stripePromise}>
       <Routes>
-        {/* Public Routes */}
+        {/* Public Home */}
         <Route path="/" element={<Home />} />
-        <Route element={<PublicRoute />}>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-        </Route>
+
+        {/* Auth Pages → redirect role-based if logged in */}
+        <Route
+          path="/login"
+          element={
+            !authUser ? (
+              <Login />
+            ) : authUser.role === "student" ? (
+              <Navigate to="/student/events" replace />
+            ) : authUser.role === "admin" ? (
+              <Navigate to="/admin/events" replace />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            !authUser ? (
+              <Register />
+            ) : authUser.role === "student" ? (
+              <Navigate to="/student/events" replace />
+            ) : authUser.role === "admin" ? (
+              <Navigate to="/admin/events" replace />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
 
         {/* Student Protected Routes */}
-        <Route element={<ProtectedRoute role="student" />}>
-          <Route path="/student/profile" element={<Profile />} />
-          <Route path="/student/events" element={<StudentEvents />} />
-          <Route path="/payment-success" element={<PaymentSuccess />} />
-
-        </Route>
+        <Route
+          path="/student/profile"
+          element={
+            authUser?.role === "student" ? (
+              <Profile />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
+          path="/student/events"
+          element={
+            authUser?.role === "student" ? (
+              <StudentEvents />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
+          path="/payment-success"
+          element={
+            authUser?.role === "student" ? (
+              <PaymentSuccess />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
 
         {/* Admin Protected Routes */}
-        <Route element={<ProtectedRoute role="admin" />}>
-          <Route path="/admin/participants" element={<Participants />} />
-          <Route path="/admin/events" element={<Events />} />
-          <Route path="/admin/settings" element={<Settings />} />
-          <Route path="/admin/certificates" element={<AdminCertificates />} />
-        </Route>
+        <Route
+          path="/admin/participants"
+          element={
+            authUser?.role === "admin" ? (
+              <Participants />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
+          path="/admin/events"
+          element={
+            authUser?.role === "admin" ? (
+              <Events />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
+          path="/admin/settings"
+          element={
+            authUser?.role === "admin" ? (
+              <Settings />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
+          path="/admin/certificates"
+          element={
+            authUser?.role === "admin" ? (
+              <AdminCertificates />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
 
         {/* Not Found */}
         <Route path="*" element={<NotFound />} />

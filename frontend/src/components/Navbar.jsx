@@ -1,13 +1,36 @@
 // src/components/Navbar.js
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, User } from "lucide-react";
-import useAuth from "../hooks/useAuth";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import axiosInstance from "../utils/axiosInstance";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  // ✅ Get logged in user
+  const { data: user } = useQuery({
+    queryKey: ["authUser"]
+  });
+
+
+
+
+
+  // ✅ Logout handler
+  const handleLogout = async () => {
+    try {
+      await axiosInstance.post("/auth/logout"); // backend clears cookie
+    } catch (err) {
+      console.error("Logout failed:", err);
+    } finally {
+      queryClient.setQueryData(["authUser"], null); // clear user cache
+      navigate("/login");
+    }
+  };
 
   const studentLinks = [
     { name: "Events", path: "/student/events" },
@@ -69,7 +92,7 @@ export default function Navbar() {
                   <button
                     className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
                     onClick={() => {
-                      logout();
+                      handleLogout();
                       setProfileOpen(false);
                     }}
                   >
@@ -121,7 +144,7 @@ export default function Navbar() {
             <button
               className="bg-red-500 w-full py-2 rounded-lg hover:bg-red-600 transition"
               onClick={() => {
-                logout();
+                handleLogout();
                 setOpen(false);
               }}
             >

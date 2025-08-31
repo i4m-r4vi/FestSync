@@ -1,12 +1,25 @@
 // src/pages/student/Profile.jsx
 import Navbar from "../../components/Navbar";
-import useAuth from "../../hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
+import axiosInstance from "../../utils/axiosInstance";
 
 export default function Profile() {
-  const { user } = useAuth();
+  const { data: user, isLoading, isError } = useQuery({
+    queryKey: ["authUser"], // ✅ unified query key
+    queryFn: async () => {
+      const { data } = await axiosInstance.get("/auth/profile");
+      return data.user;
+    },
+  });
 
-  if (!user) {
+  if (isLoading) {
     return <p className="text-center mt-10">Loading profile...</p>;
+  }
+
+  if (isError || !user) {
+    return (
+      <p className="text-center mt-10 text-red-500">Failed to load profile</p>
+    );
   }
 
   return (
@@ -25,10 +38,6 @@ export default function Profile() {
           <p className="text-gray-600">{user.email}</p>
 
           <div className="mt-6 text-left space-y-3">
-            <div className="bg-gray-50 p-3 rounded-lg">
-              <span className="font-semibold">Role: </span>
-              {user.role}
-            </div>
             <div className="bg-gray-50 p-3 rounded-lg">
               <span className="font-semibold">College: </span>
               {user.clgName}

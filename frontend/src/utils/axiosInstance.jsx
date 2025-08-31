@@ -1,28 +1,24 @@
 // src/utils/axiosInstance.js
 import axios from "axios";
 
-// Create instance
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_APP_BACKEND, // ✅ Change this to your backend URL
+  baseURL: import.meta.env.VITE_APP_BACKEND, // Backend URL from .env
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true,
+  withCredentials: true, // ✅ sends loginToken cookie automatically
 });
 
-// Add token to every request if available
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const storedUser = localStorage.getItem("festsync_user");
-    if (storedUser) {
-      const user = JSON.parse(storedUser);
-      if (user.token) {
-        config.headers.Authorization = `Bearer ${user.token}`;
-      }
+// 🔑 Optional: handle expired sessions
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // Session expired or invalid -> redirect to login
+      window.location.href = "/login";
     }
-    return config;
-  },
-  (error) => Promise.reject(error)
+    return Promise.reject(error);
+  }
 );
 
 export default axiosInstance;

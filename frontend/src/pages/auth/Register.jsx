@@ -1,21 +1,20 @@
 // src/pages/auth/Register.js
 import { useState } from "react";
 import axiosInstance from "../../utils/axiosInstance";
-import useAuth from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { EyeIcon, EyeOffIcon } from "lucide-react"; // 👁️ icons
 
 export default function Register() {
-  const { login } = useAuth();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
     fullname: "",
     email: "",
     password: "",
-    role: "student",   
     clgName: "",
   });
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -25,8 +24,6 @@ export default function Register() {
     e.preventDefault();
     try {
       const { data } = await axiosInstance.post("/auth/signup", form);
-
-      login({ ...data.user, token: data.token });
 
       // Redirect based on role
       if (data.user.role === "student") {
@@ -70,15 +67,29 @@ export default function Register() {
           required
         />
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          className="w-full border p-2 rounded mb-3"
-          value={form.password}
-          onChange={handleChange}
-          required
-        />
+        {/* 👁️ Password with toggle */}
+        <div className="relative mb-3">
+          <input
+            type={showPassword ? "text" : "password"}
+            name="password"
+            placeholder="Password"
+            className="w-full border p-2 rounded"
+            value={form.password}
+            onChange={handleChange}
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-2 text-gray-600"
+          >
+            {showPassword ? (
+              <EyeOffIcon className="w-5 h-5" />
+            ) : (
+              <EyeIcon className="w-5 h-5" />
+            )}
+          </button>
+        </div>
 
         <input
           type="text"

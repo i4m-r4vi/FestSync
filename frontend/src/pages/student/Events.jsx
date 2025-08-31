@@ -30,8 +30,9 @@ export default function StudentEvents() {
         `/payment/payment-intent/${selectedEvent._id}`, // your backend endpoint
         { subEvent }
       );
-
+      
       const { url } = data; // Backend returns the session URL
+
       if (!url) {
         alert("Failed to create checkout session.");
         return;
@@ -106,15 +107,6 @@ export default function StudentEvents() {
               ))}
             </select>
 
-            {/* Card Input for Paid Events */}
-            {selectedEvent.amount > 0 && (
-              <div className="mt-4">
-                <label className="block mb-2 font-semibold">Card Details:</label>
-                <div className="border p-2 rounded">
-                  <CardElement options={{ style: { base: { fontSize: "16px" } } }} />
-                </div>
-              </div>
-            )}
 
             {/* Buttons */}
             <div className="flex justify-end gap-3 mt-4">
@@ -126,8 +118,8 @@ export default function StudentEvents() {
               </button>
               <button
                 className={`px-4 py-2 rounded text-white ${selectedEvent.amount > 0
-                    ? "bg-blue-600 hover:bg-blue-700"
-                    : "bg-green-600 hover:bg-green-700"
+                  ? "bg-blue-600 hover:bg-blue-700"
+                  : "bg-green-600 hover:bg-green-700"
                   }`}
                 onClick={handleRegister}
               >
