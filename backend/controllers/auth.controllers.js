@@ -59,7 +59,11 @@ export const signin = async (req, res) => {
 
 export const me = async (req, res) => {
     try {
-        res.status(200).json({ name: req.user.fullname });
+        const user = await UserAuth.findById(req.user._id).select("-password").populate({ path: "registeredEvents", select: ["-registeredUsers", "-updatedAt", "-createdAt", "-password"] });
+        if (!user) {
+            return res.status(400).json({ message: "user did not found" });
+        }
+        res.status(200).json({ userInfo: user })
     } catch (error) {
         console.error("Error occurred during me:", error);
         res.status(500).json({ message: "Internal server error." });

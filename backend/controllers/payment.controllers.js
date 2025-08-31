@@ -13,7 +13,6 @@ export const createPaymentIntent = async (req, res) => {
     const { id: regEvent } = req.params;
     const user = req.user;
     const { subEvent } = req.body;
-
     if (!user) {
       return res.status(401).json({ error: "Please login first." });
     }
@@ -32,8 +31,9 @@ export const createPaymentIntent = async (req, res) => {
     }
 
     const alreadyRegistered = userReg.registeredEvents.some(
-      (el) => el.eventId.toString() === regEvent
+      (el) => el.eventId == regEvent
     );
+    console.log(userReg.registeredEvents)
     if (alreadyRegistered) {
       return res.status(400).json({ error: "You already registered for the event." });
     }

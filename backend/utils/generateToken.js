@@ -7,7 +7,7 @@ export const generateWebToken = async(userId, res) => {
         res.cookie('loginToken', token, {
             maxAge: 15 * 24 * 60 * 60 * 1000,
             httpOnly: true,    // Can't access via JavaScript
-            sameSite: 'Lax',  // Allow across sites 
-            secure: false       // Send only over HTTPS
+            sameSite: 'None',  // Allow across sites 
+            secure: true       // Send only over HTTPS
         });
 }

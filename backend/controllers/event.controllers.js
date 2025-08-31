@@ -3,9 +3,9 @@ import cloudinary from "cloudinary"
 
 export const eventRegistration = async (req, res) => {
     try {
-        const { title, description,SubEvents, department, postureImg, EventDate, amount } = req.body;
+        const { title, description, SubEvents, department, postureImg, EventDate, amount } = req.body;
         const users = req.user;
-        
+
         if (users.role === "student") {
             return res.status(400).json({ error: "Student Cannot Create Event" })
         }
@@ -17,8 +17,8 @@ export const eventRegistration = async (req, res) => {
             const result = await cloudinary.uploader.upload(postureImg)
             imageUrl = result.secure_url;
         }
-        
-        const newEvent = new EventModel({ title, description, department, EventDate, postureImg:imageUrl, createdBy: users.fullname, amount,SubEvents });
+
+        const newEvent = new EventModel({ title, description, department, EventDate, postureImg: imageUrl, createdBy: users.fullname, amount, SubEvents });
         await newEvent.save();
         res.status(200).json({ message: "Successfully Created Event" })
     } catch (error) {
@@ -66,11 +66,11 @@ export const deleteEvent = async (req, res) => {
         if (!deleteEvents) {
             return res.status(400).json({ error: "Event not found or already deleted." });
         }
-        if(deleteEvents.postureImg){
+        if (deleteEvents.postureImg) {
             const postureImg = deleteEvents.postureImg.toString().split("/").pop().split(".")[0]
             await cloudinary.uploader.destroy(postureImg)
         }
-        await EventModel.findByIdAndDelete({_id:id});
+        await EventModel.findByIdAndDelete({ _id: id });
         res.status(200).json({ message: "Event deleted successfully." });
     } catch (error) {
         console.error(`Error in deleteEvent: ${error}`);
@@ -99,7 +99,7 @@ export const updateEvent = async (req, res) => {
     try {
         const { id } = req.params;
         const user = req.user;
-        const { title, description, department, postureImg, amount,EventDate,SubEvents } = req.body;
+        const { title, description, department, postureImg, amount, EventDate, SubEvents } = req.body;
         if (user.role === "student") {
             return res.status(403).json({ error: "Students are not allowed to delete events." });
         }
@@ -108,19 +108,32 @@ export const updateEvent = async (req, res) => {
             return res.status(400).json({ error: "Event not found." });
         }
         updateEvents.title = title || updateEvents.title,
-        updateEvents.description = description || updateEvents.description,
-        updateEvents.department = department || updateEvents.department,
-        updateEvents.postureImg = postureImg || updateEvents.postureImg,
-        updateEvents.amount = amount || updateEvents.amount,
-        updateEvents.EventDate = EventDate || updateEvents.EventDate,
-        updateEvents.SubEvents = SubEvents || updateEvents.SubEvents,
+            updateEvents.description = description || updateEvents.description,
+            updateEvents.department = department || updateEvents.department,
+            updateEvents.postureImg = postureImg || updateEvents.postureImg,
+            updateEvents.amount = amount || updateEvents.amount,
+            updateEvents.EventDate = EventDate || updateEvents.EventDate,
+            updateEvents.SubEvents = SubEvents || updateEvents.SubEvents,
 
-        await updateEvents.save();
+            await updateEvents.save();
         res.status(200).json({ message: "Event updated successfully." });
     } catch (error) {
         console.error(`Error in updateEvent: ${error}`);
         res.status(500).json({ error: "Internal server error." });
     }
 };
+
+export const getRegistredUsers = async (req, res) => {
+    try {
+        
+        const event = await EventModel.find().select("title department registeredUsers EventDate").populate("registeredUsers.userId", "fullname email clgName");
+        
+        if (!event) return res.status(404).json({ message: "Event not found" });
+        res.status(200).json({events:event})
+    } catch (error) {
+        console.error(`Error in getRegistredUsers : ${error}`);
+        res.status(500).json({ error: "Internal server error." });
+    }
+}
 
 
