@@ -1,7 +1,7 @@
 // src/pages/auth/Register.js
 import { useState } from "react";
 import axiosInstance from "../../utils/axiosInstance";
-import { useNavigate } from "react-router-dom";
+import { data, useNavigate } from "react-router-dom";
 import { EyeIcon, EyeOffIcon } from "lucide-react"; // 👁️ icons
 
 export default function Register() {
@@ -34,7 +34,7 @@ export default function Register() {
         navigate("/login");
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Registration failed");
+      setError(data.error || "Registration failed");
     }
   };
 

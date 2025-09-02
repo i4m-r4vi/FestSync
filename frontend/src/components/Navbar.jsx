@@ -33,8 +33,7 @@ export default function Navbar() {
   };
 
   const studentLinks = [
-    { name: "Events", path: "/student/events" },
-    { name: "Certificates", path: "/student/certificates" },
+    { name: "Events", path: "/student/events" }
   ];
 
   const adminLinks = [
