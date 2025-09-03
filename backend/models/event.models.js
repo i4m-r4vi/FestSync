@@ -32,13 +32,13 @@ const EventSchema = new mongoose.Schema({
         userId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'UserAuth',
-            required: true
+            required: false
         },
         name: String,
-        eventName: { type: String, required: true },
-        mail: { type: String, required: true },
-        subEvent: { type: String, required: true },
-        eventDate: { type: String, required: true }
+        eventName: { type: String, required: false },
+        mail: { type: String, required: false },
+        subEvent: { type: String, required: false },
+        eventDate: { type: String, required: false }
     }],
 
     SubEvents: [{ type: String, required: true }]

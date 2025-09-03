@@ -29,20 +29,20 @@ const UserSchema = new mongoose.Schema({
         eventId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Events',
-            required: true,
+            required: false,
             unique: true
         },
         eventName: {
             type: String,
-            required: true
+            required: false
         },
         subEvent: {
             type: String,
-            required: true
+            required: false
         },
         eventDate: {
             type: String,
-            required: true
+            required: false
         }
     }],
 }, { timestamps: true })
