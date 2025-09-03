@@ -16,6 +16,7 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2Icon } from "lucide-react";
 import axiosInstance from "./utils/axiosInstance"; // ✅ cookie-based axios
+import PaymentCancel from "./pages/PaymentCancel";
 
 const stripePromise = loadStripe(import.meta.env.VITE_Stripe_Publishable_key);
 
@@ -104,6 +105,16 @@ function App() {
           element={
             authUser?.role === "student" ? (
               <PaymentSuccess />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
+          path="/payment-cancel"
+          element={
+            authUser?.role === "student" ? (
+              <PaymentCancel />
             ) : (
               <Navigate to="/login" replace />
             )

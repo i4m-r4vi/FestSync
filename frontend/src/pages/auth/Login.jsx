@@ -4,25 +4,54 @@ import axiosInstance from "../../utils/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import Modal from "../../components/Modal";
 
 export default function Login() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const [form, setForm] = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [modal, setModal] = useState({
+    isOpen: false,
+    type: "",
+    message: "",
+  });
 
   const loginMutation = useMutation({
     mutationFn: async () => {
-      const res = await axiosInstance.post("/auth/signin", form,);
+      const res = await axiosInstance.post("/auth/signin", form);
       return res.data;
     },
-    onSuccess:async()=>{
+    onMutate: () => {
+      setModal({ isOpen: true, type: "loading", message: "Logging in..." });
+    },
+    onSuccess: async (data) => {
+      setModal({
+        isOpen: true,
+        type: "success",
+        message: "Login successful!",
+      });
+
       await queryClient.invalidateQueries({ queryKey: ["authUser"] });
+
+      setTimeout(() => {
+        setModal({ isOpen: false, type: "", message: "" });
+        if (data.user.role === "student") {
+          navigate("/student/events");
+        } else if (data.user.role === "admin") {
+          navigate("/admin/events");
+        } else {
+          navigate("/");
+        }
+      }, 1500);
     },
     onError: (err) => {
-      setError(err.response?.data?.message || "Login failed");
+      setModal({
+        isOpen: true,
+        type: "error",
+        message: err.response?.data?.message || "Login failed",
+      });
     },
   });
 
@@ -32,8 +61,7 @@ export default function Login() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setError("");
-    loginMutation.mutate(form)
+    loginMutation.mutate(form);
   };
 
   return (
@@ -43,7 +71,6 @@ export default function Login() {
         className="bg-white p-6 rounded-xl shadow-md w-96"
       >
         <h2 className="text-2xl font-bold mb-4 text-center">Login</h2>
-        {error && <p className="text-red-500 mb-3">{error}</p>}
 
         {/* Email */}
         <input
@@ -56,7 +83,7 @@ export default function Login() {
           required
         />
 
-        {/* Password with eye toggle */}
+        {/* Password with toggle */}
         <div className="relative mb-3">
           <input
             type={showPassword ? "text" : "password"}
@@ -105,6 +132,14 @@ export default function Login() {
           </a>
         </p>
       </form>
+
+      {/* Reusable Modal */}
+      <Modal
+        isOpen={modal.isOpen}
+        type={modal.type}
+        message={modal.message}
+        onClose={() => setModal({ ...modal, isOpen: false })}
+      />
     </div>
   );
 }

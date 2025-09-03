@@ -1,8 +1,9 @@
 // src/pages/auth/Register.js
 import { useState } from "react";
 import axiosInstance from "../../utils/axiosInstance";
-import { data, useNavigate } from "react-router-dom";
-import { EyeIcon, EyeOffIcon } from "lucide-react"; // 👁️ icons
+import { useNavigate } from "react-router-dom";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
+import Modal from "../../components/Modal";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -13,7 +14,12 @@ export default function Register() {
     password: "",
     clgName: "",
   });
-  const [error, setError] = useState("");
+
+  const [modal, setModal] = useState({
+    isOpen: false,
+    type: "",
+    message: "",
+  });
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
@@ -22,19 +28,43 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setModal({ isOpen: true, type: "loading", message: "Registering..." });
+
     try {
       const { data } = await axiosInstance.post("/auth/signup", form);
 
-      // Redirect based on role
-      if (data.user.role === "student") {
-        navigate("/student/events");
-      } else if (data.user.role === "admin") {
-        navigate("/admin/events");
-      } else {
-        navigate("/login");
-      }
+      setModal({
+        isOpen: true,
+        type: "success",
+        message: "Registration successful!",
+      });
+      setForm({
+        fullname: "",
+        email: "",
+        password: "",
+        clgName: "",
+      })
+      setTimeout(() => {
+        if (data.user.role === "student") {
+          navigate("/student/events");
+        } else if (data.user.role === "admin") {
+          navigate("/admin/events");
+        } else {
+          navigate("/login");
+        }
+      }, 1500);
     } catch (err) {
-      setError(data.error || "Registration failed");
+      setModal({
+        isOpen: true,
+        type: "error",
+        message: err.response?.data?.error || "Registration failed!",
+      });
+      setForm({
+        fullname: "",
+        email: "",
+        password: "",
+        clgName: "",
+      })
     }
   };
 
@@ -45,7 +75,6 @@ export default function Register() {
         className="bg-white p-6 rounded-xl shadow-md w-96"
       >
         <h2 className="text-2xl font-bold mb-4 text-center">Register</h2>
-        {error && <p className="text-red-500 mb-3">{error}</p>}
 
         <input
           type="text"
@@ -67,7 +96,7 @@ export default function Register() {
           required
         />
 
-        {/* 👁️ Password with toggle */}
+        {/* Password with toggle */}
         <div className="relative mb-3">
           <input
             type={showPassword ? "text" : "password"}
@@ -103,7 +132,7 @@ export default function Register() {
 
         <button
           type="submit"
-          className="bg-green-600 text-white w-full py-2 rounded-lg hover:bg-green-700 transition"
+          className="bg-green-600 text-white w-full py-2 rounded-lg hover:bg-green-700 transition flex items-center justify-center"
         >
           Register
         </button>
@@ -115,6 +144,14 @@ export default function Register() {
           </a>
         </p>
       </form>
+
+      {/* Modal Component */}
+      <Modal
+        isOpen={modal.isOpen}
+        type={modal.type}
+        message={modal.message}
+        onClose={() => setModal({ ...modal, isOpen: false })}
+      />
     </div>
   );
 }

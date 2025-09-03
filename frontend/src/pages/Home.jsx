@@ -1,9 +1,25 @@
 // src/pages/Home.js
 import { Link } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import { useQuery } from "@tanstack/react-query";
+import axiosInstance from "../utils/axiosInstance";
 
 export default function Home() {
+  // ✅ Fetch logged-in user
+  const { data: user } = useQuery({
+    queryKey: ["authUser"],
+    queryFn: async () => {
+      const res = await axiosInstance.get("/auth/me");
+      return res.data.user;
+    },
+    retry: false, // don't spam if not logged in
+  });
+
   return (
     <div className="min-h-screen flex flex-col">
+      {/* ✅ Navbar only shows if logged in */}
+      <Navbar />
+
       {/* Hero Section */}
       <header className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-20 px-6 text-center">
         <h1 className="text-4xl md:text-6xl font-bold mb-4">
@@ -13,20 +29,24 @@ export default function Home() {
           The ultimate campus event management platform.  
           Discover events, register online, and get instant certificates.
         </p>
-        <div className="space-x-4">
-          <Link
-            to="/login"
-            className="bg-yellow-400 text-blue-900 px-6 py-3 rounded-lg font-semibold hover:bg-yellow-300 transition"
-          >
-            Login
-          </Link>
-          <Link
-            to="/register"
-            className="bg-white text-blue-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
-          >
-            Register
-          </Link>
-        </div>
+
+        {/* ✅ Only show Login/Register if NOT logged in */}
+        {!user && (
+          <div className="space-x-4">
+            <Link
+              to="/login"
+              className="bg-yellow-400 text-blue-900 px-6 py-3 rounded-lg font-semibold hover:bg-yellow-300 transition"
+            >
+              Login
+            </Link>
+            <Link
+              to="/register"
+              className="bg-white text-blue-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
+            >
+              Register
+            </Link>
+          </div>
+        )}
       </header>
 
       {/* Features Section */}
