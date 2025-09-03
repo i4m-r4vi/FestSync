@@ -17,6 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Loader2Icon } from "lucide-react";
 import axiosInstance from "./utils/axiosInstance"; // ✅ cookie-based axios
 import PaymentCancel from "./pages/PaymentCancel";
+import ForgotPassword from "./pages/auth/ForgotPassword";
 
 const stripePromise = loadStripe(import.meta.env.VITE_Stripe_Publishable_key);
 
@@ -77,6 +78,10 @@ function App() {
               <Navigate to="/" replace />
             )
           }
+        />
+        <Route
+          path="/forgot-password"
+          element={<ForgotPassword/>}
         />
 
         {/* Student Protected Routes */}

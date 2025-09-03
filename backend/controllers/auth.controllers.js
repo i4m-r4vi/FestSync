@@ -3,6 +3,9 @@ import bcrypt from "bcrypt"
 import { generateWebToken } from "../utils/generateToken.js";
 import jwt from 'jsonwebtoken'
 import nodemailer from 'nodemailer'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 export const signup = async (req, res) => {
     try {
@@ -78,7 +81,7 @@ export const forgotPassowrdRequest = async (req, res) => {
         const token = jwt.sign({ id: user._id, email: user.email, fullname: user.fullname }, secret, {
             expiresIn: '10m'
         })
-        const resetUrl = `http://127.0.0.1:5000/api/auth/forgotPassword/${user._id}/${token}`
+        const resetUrl = `${process.env.BACKEND_URL}/api/auth/forgotPassword/${user._id}/${token}`
         const transporter = await nodemailer.createTransport({
             host: 'smtp.gmail.com',
             port: 465,
@@ -97,7 +100,7 @@ export const forgotPassowrdRequest = async (req, res) => {
       <h2 style="color: #333;">Password Reset Request</h2>
       <p>Hello ${user.fullname || 'User'},</p>
       <p>You are receiving this email because you (or someone else) requested a password reset for your account.</p>
-      <p>Please click the button below to reset your password. This link will expire in 5 minutes.</p>
+      <p>Please click the button below to reset your password. This link will expire in 10 minutes.</p>
       <p style="text-align: center;">
         <a href="${resetUrl}" style="display: inline-block; padding: 12px 20px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 5px;">Reset Password</a>
       </p>
