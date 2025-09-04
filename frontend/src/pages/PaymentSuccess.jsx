@@ -33,9 +33,9 @@ export default function PaymentSuccess() {
         console.log(res)
 
         if (res.status === 200) {
-          setStatus("Registration confirmed! 🎉");
+          setStatus("Registration confirmed! 🎉 Please Wait few Second");
           // Optional redirect to "My Registrations" after a delay
-          setTimeout(() => navigate("/my-registrations"), 3000);
+          setTimeout(() => navigate("/student/registered-events"), 2000);
         } else {
           setStatus(res.data.error || "Payment not verified.");
         }
