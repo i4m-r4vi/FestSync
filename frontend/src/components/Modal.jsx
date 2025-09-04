@@ -1,39 +1,49 @@
 // src/components/Modal.js
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { CheckCircle, XCircle, AlertTriangle, Loader } from 'lucide-react';
 
 export default function Modal({ isOpen, type, message, onClose }) {
-  if (!isOpen) return null;
 
-  const colors = {
-    success: "bg-green-100 text-green-700 border-green-400",
-    error: "bg-red-100 text-red-700 border-red-400",
-    loading: "bg-blue-100 text-blue-700 border-blue-400",
+  const icons = {
+    success: <CheckCircle className="text-green-500" size={24}/>,
+    error: <XCircle className="text-red-500" size={24}/>,
+    loading: <Loader className="animate-spin text-primary" size={24}/>,
+    warning: <AlertTriangle className="text-yellow-500" size={24}/>
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <motion.div
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        className={`rounded-lg shadow-xl p-6 w-96 border ${colors[type]}`}
-      >
-        <h3 className="text-lg font-bold mb-2 capitalize">{type}</h3>
-        <p className="mb-4">{message}</p>
+    <AnimatePresence>
+        {isOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4">
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-card border border-border rounded-lg shadow-xl p-6 w-full max-w-sm"
+              >
+                <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-secondary">
+                        {icons[type]}
+                    </div>
+                    <div className="flex-grow">
+                        <h3 className="text-lg font-bold mb-1 capitalize text-foreground">{type}</h3>
+                        <p className="text-muted-foreground">{message}</p>
+                    </div>
+                </div>
 
-        {type !== "loading" && (
-          <button
-            onClick={onClose}
-            className="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900 transition"
-          >
-            Close
-          </button>
+                {type !== "loading" && (
+                  <div className="flex justify-end mt-6">
+                    <button
+                        onClick={onClose}
+                        className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:opacity-90 transition"
+                    >
+                        Close
+                    </button>
+                  </div>
+                )}
+              </motion.div>
+            </div>
         )}
-        {type === "loading" && (
-          <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-6 w-6 border-2 border-t-transparent border-blue-600"></div>
-          </div>
-        )}
-      </motion.div>
-    </div>
+    </AnimatePresence>
   );
 }

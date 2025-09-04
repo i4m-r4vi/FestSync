@@ -5,7 +5,7 @@ import Register from "./pages/auth/Register";
 import NotFound from "./pages/NotFound";
 import Profile from "./pages/student/Profile";
 import Participants from "./pages/admin/Participants";
-import Settings from "./pages/admin/Settings";
+import AdminProfile from "./pages/admin/Profile";
 import AdminCertificates from "./pages/admin/AdminCertificates";
 import Events from "./pages/admin/Events";
 import { Elements } from "@stripe/react-stripe-js";
@@ -18,6 +18,8 @@ import { Loader2Icon } from "lucide-react";
 import axiosInstance from "./utils/axiosInstance"; // ✅ cookie-based axios
 import PaymentCancel from "./pages/PaymentCancel";
 import ForgotPassword from "./pages/auth/ForgotPassword";
+import About from "./pages/About";
+import RegisteredEvents from "./pages/student/RegisteredEvents";
 
 const stripePromise = loadStripe(import.meta.env.VITE_Stripe_Publishable_key);
 
@@ -49,6 +51,7 @@ function App() {
       <Routes>
         {/* Public Home */}
         <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
 
         {/* Auth Pages → redirect role-based if logged in */}
         <Route
@@ -105,6 +108,16 @@ function App() {
             )
           }
         />
+         <Route
+          path="/student/registered-events"
+          element={
+            authUser?.role === "student" ? (
+              <RegisteredEvents />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
         <Route
           path="/payment-success"
           element={
@@ -148,10 +161,10 @@ function App() {
           }
         />
         <Route
-          path="/admin/settings"
+          path="/admin/profile"
           element={
             authUser?.role === "admin" ? (
-              <Settings />
+              <AdminProfile />
             ) : (
               <Navigate to="/login" replace />
             )

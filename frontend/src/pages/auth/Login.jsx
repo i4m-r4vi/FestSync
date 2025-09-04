@@ -1,10 +1,12 @@
 // src/pages/auth/Login.js
 import { useState } from "react";
 import axiosInstance from "../../utils/axiosInstance";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Modal from "../../components/Modal";
+import { motion } from "framer-motion";
+import Logo from "../../components/Logo";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -19,27 +21,21 @@ export default function Login() {
   });
 
   const loginMutation = useMutation({
-    mutationFn: async () => {
-      const res = await axiosInstance.post("/auth/signin", form);
-      return res.data;
-    },
-    onMutate: () => {
-      setModal({ isOpen: true, type: "loading", message: "Logging in..." });
-    },
+    mutationFn: (loginData) => axiosInstance.post("/auth/signin", loginData),
     onSuccess: async (data) => {
       setModal({
         isOpen: true,
         type: "success",
-        message: "Login successful!",
+        message: "Login successful! Redirecting...",
       });
 
       await queryClient.invalidateQueries({ queryKey: ["authUser"] });
 
       setTimeout(() => {
         setModal({ isOpen: false, type: "", message: "" });
-        if (data.user.role === "student") {
+        if (data.data.user.role === "student") {
           navigate("/student/events");
-        } else if (data.user.role === "admin") {
+        } else if (data.data.user.role === "admin") {
           navigate("/admin/events");
         } else {
           navigate("/");
@@ -65,75 +61,92 @@ export default function Login() {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-6 rounded-xl shadow-md w-96"
+    <div className="flex items-center justify-center min-h-screen bg-background p-4">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md"
       >
-        <h2 className="text-2xl font-bold mb-4 text-center">Login</h2>
-
-        {/* Email */}
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          className="w-full border p-2 rounded mb-3"
-          value={form.email}
-          onChange={handleChange}
-          required
-        />
-
-        {/* Password with toggle */}
-        <div className="relative mb-3">
-          <input
-            type={showPassword ? "text" : "password"}
-            name="password"
-            placeholder="Password"
-            className="w-full border p-2 rounded pr-10"
-            value={form.password}
-            onChange={handleChange}
-            required
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
-          >
-            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-          </button>
+        <div className="text-center mb-8">
+            <Link to="/" className="inline-block">
+                <Logo />
+            </Link>
         </div>
-
-        {/* Forgot password */}
-        <div className="flex justify-end mb-3">
-          <a
-            href="/forgot-password"
-            className="text-sm text-blue-600 hover:underline"
-          >
-            Forgot Password?
-          </a>
-        </div>
-
-        {/* Submit */}
-        <button
-          type="submit"
-          disabled={loginMutation.isLoading}
-          className={`${loginMutation.isLoading
-              ? "bg-gray-400"
-              : "bg-blue-600 hover:bg-blue-700"
-            } text-white w-full py-2 rounded-lg transition`}
+        <form
+          onSubmit={handleSubmit}
+          className="bg-card border border-border p-8 rounded-2xl shadow-lg w-full"
         >
-          {loginMutation.isLoading ? "Logging in..." : "Login"}
-        </button>
+          <h2 className="text-3xl font-bold mb-2 text-center text-foreground">
+            Welcome Back!
+          </h2>
+          <p className="text-center text-muted-foreground mb-6">Login to continue to FestSync.</p>
 
-        <p className="text-sm text-gray-600 mt-3 text-center">
-          Don't have an account?{" "}
-          <a href="/register" className="text-green-600 font-semibold">
-            Register
-          </a>
-        </p>
-      </form>
+          <div className="mb-4">
+            <label className="block text-foreground/80 mb-2" htmlFor="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="you@example.com"
+              className="w-full bg-input text-foreground border-border border p-3 rounded-lg focus:ring-2 focus:ring-ring transition"
+              value={form.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-      {/* Reusable Modal */}
+          <div className="relative mb-4">
+            <label className="block text-foreground/80 mb-2" htmlFor="password">Password</label>
+            <input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              name="password"
+              placeholder="••••••••"
+              className="w-full bg-input text-foreground border-border border p-3 rounded-lg pr-10 focus:ring-2 focus:ring-ring transition"
+              value={form.password}
+              onChange={handleChange}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-10 text-muted-foreground hover:text-foreground"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
+
+          <div className="flex justify-end mb-6">
+            <Link
+              to="/forgot-password"
+              className="text-sm text-primary hover:underline"
+            >
+              Forgot Password?
+            </Link>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loginMutation.isPending}
+            className={`w-full py-3 rounded-lg text-primary-foreground font-semibold transition-transform transform hover:scale-105 ${
+              loginMutation.isPending
+                ? "bg-primary/50 cursor-not-allowed"
+                : "bg-primary hover:opacity-90"
+            }`}
+          >
+            {loginMutation.isPending ? "Logging in..." : "Login"}
+          </button>
+
+          <p className="text-sm text-muted-foreground mt-6 text-center">
+            Don't have an account?{" "}
+            <Link to="/register" className="text-primary font-semibold hover:underline">
+              Register here
+            </Link>
+          </p>
+        </form>
+      </motion.div>
+
       <Modal
         isOpen={modal.isOpen}
         type={modal.type}

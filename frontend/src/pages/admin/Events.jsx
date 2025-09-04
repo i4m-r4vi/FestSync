@@ -3,6 +3,8 @@ import axiosInstance from "../../utils/axiosInstance";
 import Navbar from "../../components/Navbar";
 import UploadImage from "../../components/UploadImage";
 import SubEventsInput from "./SubEventsInput";
+import { Loader2, Trash2, X } from "lucide-react";
+import Modal from "../../components/Modal";
 
 export default function AdminEvents() {
   const [events, setEvents] = useState([]);
@@ -15,7 +17,12 @@ export default function AdminEvents() {
     amount: "",
     postureImg: "",
   });
-  const [showModal, setShowModal] = useState(false);
+  
+  const [modalState, setModalState] = useState({
+    isOpen: false,
+    type: "warning",
+    message: "",
+  });
   const [addBtn, setAddBtn] = useState(false);
   const [loading, setLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(null); // store eventId instead of boolean
@@ -38,14 +45,14 @@ export default function AdminEvents() {
     setLoading(true);
 
     if (!newEvent.postureImg) {
-      setShowModal(true);
-      setLoading(false); // FIX: reset loading
+      setModalState({ isOpen: true, message: "Please upload an image for the event." });
+      setLoading(false);
       return;
     }
 
     try {
       await axiosInstance.post("/events/uploadEvents", newEvent);
-      setAddBtn(true);
+      setAddBtn(prev => !prev);
       setNewEvent({
         title: "",
         description: "",
@@ -53,12 +60,12 @@ export default function AdminEvents() {
         department: "",
         amount: "",
         postureImg: "",
-        SubEvents: [], // FIX: consistent key
+        SubEvents: [],
       });
       fetchEvents();
     } catch (err) {
       console.error(err);
-      alert("Failed to add event");
+      setModalState({ isOpen: true, type: 'error', message: 'Failed to add event.'});
     } finally {
       setLoading(false);
     }
@@ -69,138 +76,108 @@ export default function AdminEvents() {
     try {
       await axiosInstance.delete(`/events/deleteEvent/${id}`);
       setEvents(events.filter((e) => e._id !== id));
-      alert("Event deleted!");
     } catch (err) {
       console.error(err);
-      alert("Failed to delete event");
+      setModalState({ isOpen: true, type: 'error', message: 'Failed to delete event.'});
     } finally {
       setDeleteLoading(null);
     }
   };
 
-
   return (
-    <>
-      <Navbar role="admin" />
-      <div className="pt-20 px-6 container m-auto">
-        <h2 className="text-2xl font-bold mb-4">Manage Events</h2>
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <div className="pt-28 px-6 container m-auto">
+        <h2 className="text-3xl font-bold mb-8 text-foreground">Manage Events</h2>
 
         {/* Add Event Form */}
         <form
           onSubmit={handleAddEvent}
-          className="bg-white p-6 container m-auto rounded-xl shadow-md mb-8 grid gap-4 sm:gap-6 sm:grid-cols-2"
+          className="bg-card border border-border p-6 rounded-xl shadow-sm mb-10 grid gap-6 sm:grid-cols-2"
         >
-          {/* Event Name */}
-          <input
-            type="text"
-            placeholder="Event Name"
-            className="border p-2 rounded w-full sm:col-span-2"
-            value={newEvent.title}
-            onChange={(e) =>
-              setNewEvent({ ...newEvent, title: e.target.value })
-            }
-            required
-          />
-
-          {/* Description */}
-          <textarea
-            placeholder="Description"
-            className="border p-2 rounded w-full sm:col-span-2 min-h-[100px]"
-            value={newEvent.description}
-            onChange={(e) =>
-              setNewEvent({ ...newEvent, description: e.target.value })
-            }
-            required
-          />
-
-          {/* SubEvents Input */}
           <div className="sm:col-span-2">
-            <SubEventsInput
-              subEvents={newEvent.SubEvents}
-              setSubEvents={(subs) =>
-                setNewEvent({ ...newEvent, SubEvents: subs })
-              }
+            <label className="block text-foreground/80 mb-2">Event Name</label>
+            <input
+              type="text"
+              placeholder="e.g. Tech Conference 2024"
+              className="border-border bg-input p-3 rounded w-full"
+              value={newEvent.title}
+              onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
+              required
             />
           </div>
 
-          {/* Department */}
-          <input
-            type="text"
-            placeholder="Department"
-            className="border p-2 rounded w-full"
-            value={newEvent.department}
-            onChange={(e) =>
-              setNewEvent({ ...newEvent, department: e.target.value })
-            }
-            required
-          />
-
-          {/* Event Date */}
-          <input
-            type="date"
-            placeholder="Event Date"
-            className="border p-2 rounded w-full"
-            value={newEvent.EventDate}
-            onChange={(e) =>
-              setNewEvent({ ...newEvent, EventDate: e.target.value })
-            }
-            required
-          />
-
-          {/* Amount */}
-          <input
-            type="text"
-            placeholder="Amount"
-            className="border p-2 rounded w-full"
-            value={newEvent.amount}
-            onChange={(e) =>
-              setNewEvent({ ...newEvent, amount: e.target.value })
-            }
-            required
-          />
-
-          {/* Upload Image */}
           <div className="sm:col-span-2">
+            <label className="block text-foreground/80 mb-2">Description</label>
+            <textarea
+              placeholder="Describe the event"
+              className="border-border bg-input p-3 rounded w-full min-h-[120px]"
+              value={newEvent.description}
+              onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
+              required
+            />
+          </div>
+
+          <div className="sm:col-span-2">
+            <label className="block text-foreground/80 mb-2">Sub-Events (Optional)</label>
+            <SubEventsInput
+              subEvents={newEvent.SubEvents}
+              setSubEvents={(subs) => setNewEvent({ ...newEvent, SubEvents: subs })}
+            />
+          </div>
+
+          <div>
+            <label className="block text-foreground/80 mb-2">Department</label>
+            <input
+              type="text"
+              placeholder="e.g. Computer Science"
+              className="border-border bg-input p-3 rounded w-full"
+              value={newEvent.department}
+              onChange={(e) => setNewEvent({ ...newEvent, department: e.target.value })}
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-foreground/80 mb-2">Event Date</label>
+            <input
+              type="date"
+              className="border-border bg-input p-3 rounded w-full"
+              value={newEvent.EventDate}
+              onChange={(e) => setNewEvent({ ...newEvent, EventDate: e.target.value })}
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-foreground/80 mb-2">Registration Fee</label>
+            <input
+              type="number"
+              placeholder="Amount in INR (e.g. 100)"
+              className="border-border bg-input p-3 rounded w-full"
+              value={newEvent.amount}
+              onChange={(e) => setNewEvent({ ...newEvent, amount: e.target.value })}
+              required
+            />
+          </div>
+
+          <div className="sm:col-span-2">
+            <label className="block text-foreground/80 mb-2">Event Poster</label>
             <UploadImage
               onUpload={(url) => setNewEvent({ ...newEvent, postureImg: url })}
               addBtn={addBtn}
             />
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
-            className={`py-2 rounded sm:col-span-2 flex items-center justify-center gap-2 text-white
-      ${
-        loading
-          ? "bg-gray-400 cursor-not-allowed"
-          : "bg-green-600 hover:bg-green-700"
-      }`}
+            className="py-3 rounded-lg sm:col-span-2 flex items-center justify-center gap-2 text-primary-foreground bg-primary hover:opacity-90 disabled:bg-primary/50"
           >
             {loading ? (
               <>
-                <svg
-                  className="animate-spin h-5 w-5 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                  ></path>
-                </svg>
-                Adding...
+                <Loader2 className="animate-spin" size={20} />
+                Adding Event...
               </>
             ) : (
               "+ Add Event"
@@ -211,83 +188,52 @@ export default function AdminEvents() {
         {/* Event List */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {events.map((event) => (
-            <div key={event._id} className="bg-white rounded-xl shadow-md p-4">
+            <div key={event._id} className="bg-card border border-border rounded-xl shadow-sm p-4 flex flex-col">
               <img
                 src={event.postureImg}
                 alt={event.title}
                 className="w-full h-40 rounded-lg object-cover"
               />
-              <h3 className="text-lg font-semibold mt-2">{event.title}</h3>
-              <p className="text-gray-600">{event.description}</p>
-              <p className="text-gray-600">
-                {(event.SubEvents || []).join(", ")}
-              </p>
-              <p className="text-sm text-gray-500 mt-1">
-                📅 {new Date(event.EventDate).toLocaleDateString()}
-              </p>
-              <p className="text-sm text-blue-600 font-semibold">
-                ₹{event.amount}
-              </p>
+              <div className="flex-grow mt-4">
+                <h3 className="text-lg font-semibold text-foreground">{event.title}</h3>
+                <p className="text-muted-foreground text-sm mt-1 line-clamp-2">{event.description}</p>
+                <p className="text-muted-foreground text-sm mt-2">
+                  {(event.SubEvents || []).join(", ")}
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  📅 {new Date(event.EventDate).toLocaleDateString()}
+                </p>
+                <p className="text-sm text-primary font-semibold">
+                  ₹{event.amount}
+                </p>
+              </div>
               <button
-                className={`w-full py-2 mt-3 rounded flex items-center justify-center gap-2
-        ${
-          deleteLoading === event._id
-            ? "bg-gray-400 cursor-not-allowed"
-            : "bg-red-500 hover:bg-red-600 text-white"
-        }`}
+                className="w-full py-2 mt-4 rounded-md flex items-center justify-center gap-2 bg-destructive text-destructive-foreground hover:opacity-90 disabled:opacity-50"
                 onClick={() => handleDelete(event._id)}
                 disabled={deleteLoading === event._id}
               >
                 {deleteLoading === event._id ? (
                   <>
-                    <svg
-                      className="animate-spin h-5 w-5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                      ></path>
-                    </svg>
+                    <Loader2 className="animate-spin" size={18} />
                     Deleting...
                   </>
                 ) : (
-                  "Delete"
+                  <>
+                    <Trash2 size={16} />
+                    Delete
+                  </>
                 )}
               </button>
             </div>
           ))}
         </div>
-
-        {/* Modal */}
-        {showModal && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full text-center">
-              <h3 className="text-lg font-semibold mb-4">Image Required</h3>
-              <p className="mb-4">
-                Please upload an image before submitting the event.
-              </p>
-              <button
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                onClick={() => setShowModal(false)}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        )}
       </div>
-    </>
+      <Modal 
+        isOpen={modalState.isOpen}
+        type={modalState.type}
+        message={modalState.message}
+        onClose={() => setModalState({ ...modalState, isOpen: false})}
+      />
+    </div>
   );
 }

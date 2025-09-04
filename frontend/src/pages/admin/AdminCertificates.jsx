@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import axiosInstance from "../../utils/axiosInstance";
 import Navbar from "../../components/Navbar";
+import { Loader2 } from "lucide-react";
 
 export default function AdminCertificates() {
   const [participants, setParticipants] = useState([]);
@@ -25,38 +26,47 @@ export default function AdminCertificates() {
     }
   };
 
-  if (loading) return <p className="text-center mt-10">Loading participants...</p>;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-background">
+        <Loader2 className="animate-spin w-8 h-8 text-primary" />
+      </div>
+    );
+  }
 
   return (
-    <>
-      <Navbar role="admin" />
-      <div className="pt-20 px-4 md:px-6">
-        <h2 className="text-2xl font-bold mb-6">Send Certificates</h2>
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <main className="container mx-auto pt-28 px-6">
+        <h2 className="text-3xl font-bold mb-8 text-foreground">Send Certificates</h2>
 
         {participants.length === 0 ? (
-          <p className="text-gray-600">No participants found.</p>
+          <div className="text-center py-16 border-2 border-dashed border-border rounded-xl">
+            <h3 className="text-xl font-semibold text-foreground">No Participants Found</h3>
+            <p className="text-muted-foreground mt-2">There are no participants to send certificates to yet.</p>
+          </div>
         ) : (
           <>
-            {/* ✅ Table for desktops */}
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full bg-white shadow-md rounded-lg">
-                <thead className="bg-blue-600 text-white">
+            {/* Table for desktops */}
+            <div className="hidden md:block overflow-x-auto bg-card border border-border rounded-lg shadow-sm">
+              <table className="w-full">
+                <thead className="bg-secondary">
                   <tr>
-                    <th className="p-3 text-left">Student</th>
-                    <th className="p-3 text-left">Email</th>
-                    <th className="p-3 text-left">Event</th>
-                    <th className="p-3 text-center">Action</th>
+                    <th className="p-4 text-left font-semibold text-secondary-foreground">Student</th>
+                    <th className="p-4 text-left font-semibold text-secondary-foreground">Email</th>
+                    <th className="p-4 text-left font-semibold text-secondary-foreground">Event</th>
+                    <th className="p-4 text-center font-semibold text-secondary-foreground">Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {participants.map((p) => (
-                    <tr key={p._id} className="border-b hover:bg-gray-50">
-                      <td className="p-3">{p.fullname}</td>
-                      <td className="p-3">{p.email}</td>
-                      <td className="p-3">{p.eventName}</td>
-                      <td className="p-3 text-center">
+                    <tr key={p._id} className="border-b border-border last:border-0 hover:bg-secondary/50">
+                      <td className="p-4 text-foreground">{p.fullname}</td>
+                      <td className="p-4 text-muted-foreground">{p.email}</td>
+                      <td className="p-4 text-muted-foreground">{p.eventName}</td>
+                      <td className="p-4 text-center">
                         <button
-                          className="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 transition"
+                          className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:opacity-90 transition"
                           onClick={() => handleSendCertificate(p._id, p.eventId)}
                         >
                           Send
@@ -68,18 +78,18 @@ export default function AdminCertificates() {
               </table>
             </div>
 
-            {/* ✅ Card layout for mobile */}
+            {/* Card layout for mobile */}
             <div className="grid gap-4 md:hidden">
               {participants.map((p) => (
                 <div
                   key={p._id}
-                  className="bg-white p-4 rounded-lg shadow-md flex flex-col gap-2"
+                  className="bg-card border border-border p-4 rounded-lg shadow-sm flex flex-col gap-2"
                 >
-                  <p className="text-lg font-semibold">{p.fullname}</p>
-                  <p className="text-gray-600 text-sm">{p.email}</p>
-                  <p className="text-gray-500 text-sm">📌 {p.eventName}</p>
+                  <p className="text-lg font-semibold text-foreground">{p.fullname}</p>
+                  <p className="text-muted-foreground text-sm">{p.email}</p>
+                  <p className="text-muted-foreground text-sm">Event: {p.eventName}</p>
                   <button
-                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+                    className="bg-primary text-primary-foreground w-full mt-2 px-4 py-2 rounded-lg hover:opacity-90 transition"
                     onClick={() => handleSendCertificate(p._id, p.eventId)}
                   >
                     Send Certificate
@@ -89,7 +99,7 @@ export default function AdminCertificates() {
             </div>
           </>
         )}
-      </div>
-    </>
+      </main>
+    </div>
   );
 }

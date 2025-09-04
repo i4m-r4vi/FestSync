@@ -14,7 +14,7 @@ export default function PaymentCancel() {
         <div className="space-x-4">
           <Link
             to="/student/events"
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+            className="bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition"
           >
             Back to Events
           </Link>

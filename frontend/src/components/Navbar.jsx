@@ -1,174 +1,252 @@
 // src/components/Navbar.js
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, X, User } from "lucide-react";
+import { Menu, X, User, LogOut, Settings, LayoutDashboard, Sun, Moon, CalendarCheck } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "../utils/axiosInstance";
+import { AnimatePresence, motion } from "framer-motion";
+import { useTheme } from "../context/ThemeContext";
+import Logo from "./Logo";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
-  // ✅ Get logged in user
   const { data: user } = useQuery({
     queryKey: ["authUser"]
   });
 
-
-
-
-
-  // ✅ Logout handler
   const handleLogout = async () => {
     try {
-      await axiosInstance.post("/auth/logout"); // backend clears cookie
+      await axiosInstance.post("/auth/logout");
     } catch (err) {
       console.error("Logout failed:", err);
     } finally {
-      queryClient.setQueryData(["authUser"], null); // clear user cache
+      queryClient.setQueryData(["authUser"], null);
       navigate("/login");
     }
   };
 
+  const publicLinks = [
+    { name: "About", path: "/about" },
+  ];
+
   const studentLinks = [
-    { name: "Events", path: "/student/events" }
+    { name: "Events", path: "/student/events", icon: <LayoutDashboard size={18} /> },
+    { name: "About", path: "/about" },
   ];
 
   const adminLinks = [
-    { name: "Manage Events", path: "/admin/events" },
-    { name: "Participants", path: "/admin/participants" },
+    { name: "Manage Events", path: "/admin/events", icon: <LayoutDashboard size={18} /> },
+    { name: "Participants", path: "/admin/participants", icon: <User size={18} /> },
+    { name: "About", path: "/about" },
   ];
 
-  const links = user?.role === "admin" ? adminLinks : studentLinks;
+  const studentProfileLinks = [
+      { name: "Profile", path: "/student/profile", icon: <User size={18} /> },
+      { name: "Registered Events", path: "/student/registered-events", icon: <CalendarCheck size={18} /> }
+  ];
+
+  const adminProfileLinks = [
+      { name: "Profile", path: "/admin/profile", icon: <User size={18} /> }
+  ]
+
+  const commonProfileLinks = user?.role === 'student' ? studentProfileLinks : adminProfileLinks
+
+  const userLinks = user?.role === "admin" ? adminLinks : (user?.role === "student" ? studentLinks : []);
+  const allLinks = user ? userLinks : publicLinks;
+
 
   return (
-    <nav className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-md fixed top-0 left-0 w-full z-50">
-      <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-3">
-        {/* Logo */}
-        <Link to="/" className="text-2xl font-bold tracking-wide">
-          Fest<span className="text-yellow-300">Sync</span>
+    <nav className="bg-card border-b border-border fixed top-0 left-0 w-full z-50">
+      <div className="container mx-auto flex justify-between items-center px-6 h-20">
+        <Link to={user ? (user.role === 'admin' ? '/admin/events' : '/student/events') : '/'}>
+            <Logo />
         </Link>
 
-        {/* Desktop Menu */}
-        <div className="hidden md:flex items-center space-x-6">
-          {user &&
-            links.map((link) => (
+        {/* Desktop Nav */}
+        <div className="hidden md:flex items-center space-x-8">
+          {allLinks.map((link) => (
               <Link
                 key={link.name}
                 to={link.path}
-                className="hover:text-yellow-300 font-medium transition"
+                className="font-medium text-foreground hover:text-primary transition-colors duration-300"
               >
                 {link.name}
               </Link>
             ))}
+            
+          <motion.button
+            onClick={toggleTheme}
+            className="p-2 rounded-full text-foreground/70 hover:text-foreground hover:bg-secondary"
+            whileTap={{ scale: 0.9, rotate: 15 }}
+            transition={{ duration: 0.1 }}
+          >
+            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+          </motion.button>
 
           {user ? (
             <div className="relative">
               <button
                 onClick={() => setProfileOpen(!profileOpen)}
-                className="w-10 h-10 rounded-full bg-yellow-400 text-blue-900 flex items-center justify-center font-bold"
+                className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring focus:ring-offset-background"
               >
-                <User size={20} />
+                {user.fullname ? user.fullname.charAt(0).toUpperCase() : <User size={20} />}
               </button>
-              {profileOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white text-gray-700 rounded-lg shadow-lg overflow-hidden">
-                  <Link
-                    to="/profile"
-                    className="block px-4 py-2 hover:bg-gray-100"
-                    onClick={() => setProfileOpen(false)}
+              <AnimatePresence>
+                {profileOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute right-0 mt-2 w-56 bg-card text-card-foreground rounded-lg shadow-xl overflow-hidden border border-border"
                   >
-                    Profile
-                  </Link>
-                  <Link
-                    to="/settings"
-                    className="block px-4 py-2 hover:bg-gray-100"
-                    onClick={() => setProfileOpen(false)}
-                  >
-                    Settings
-                  </Link>
-                  <button
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
-                    onClick={() => {
-                      handleLogout();
-                      setProfileOpen(false);
-                    }}
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
+                    <div className="p-4 border-b border-border">
+                      <p className="font-semibold truncate">{user.fullname}</p>
+                      <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+                    </div>
+                    {commonProfileLinks.map(link => (
+                      <Link
+                        key={link.path}
+                        to={link.path}
+                        className="flex items-center gap-3 px-4 py-2 hover:bg-secondary text-card-foreground"
+                        onClick={() => setProfileOpen(false)}
+                      >
+                        {link.icon}
+                        <span>{link.name}</span>
+                      </Link>
+                    ))}
+                    <button
+                      className="flex items-center gap-3 w-full text-left px-4 py-3 hover:bg-secondary text-destructive border-t border-border"
+                      onClick={() => {
+                        handleLogout();
+                        setProfileOpen(false);
+                      }}
+                    >
+                      <LogOut size={18} />
+                      <span>Logout</span>
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           ) : (
-            <>
+            <div className="space-x-2">
               <Link
                 to="/login"
-                className="bg-white text-blue-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition"
+                className="border border-primary text-primary px-5 py-2 rounded-full font-semibold hover:bg-primary hover:text-primary-foreground transition-colors duration-300"
               >
                 Login
               </Link>
               <Link
                 to="/register"
-                className="bg-yellow-400 text-blue-900 px-4 py-2 rounded-lg font-semibold hover:bg-yellow-300 transition"
+                className="bg-primary text-primary-foreground px-5 py-2 rounded-full font-semibold hover:opacity-90 transition-colors duration-300"
               >
                 Register
               </Link>
-            </>
+            </div>
           )}
         </div>
 
-        {/* Mobile Hamburger */}
-        <button className="md:hidden" onClick={() => setOpen(!open)}>
-          {open ? <X size={28} /> : <Menu size={28} />}
-        </button>
+        {/* Mobile Nav Button */}
+        <div className="md:hidden flex items-center">
+            <motion.button
+              onClick={toggleTheme}
+              className="p-2 rounded-full text-foreground/70 hover:text-foreground hover:bg-secondary mr-2"
+              whileTap={{ scale: 0.9, rotate: 15 }}
+              transition={{ duration: 0.1 }}
+            >
+              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+            </motion.button>
+            <motion.button
+              onClick={() => setOpen(!open)}
+              className="text-foreground"
+              whileTap={{ scale: 0.9 }}
+              transition={{ duration: 0.1 }}
+            >
+                {open ? <X size={28} /> : <Menu size={28} />}
+            </motion.button>
+        </div>
       </div>
 
-      {/* Mobile Menu */}
-      {open && (
-        <div className="md:hidden bg-blue-700 px-6 pb-4 space-y-3">
-          {user &&
-            links.map((link) => (
-              <Link
-                key={link.name}
-                to={link.path}
-                className="block py-2 border-b border-blue-500 hover:text-yellow-300 transition"
-                onClick={() => setOpen(false)}
-              >
-                {link.name}
-              </Link>
-            ))}
-
-          {user ? (
-            <button
-              className="bg-red-500 w-full py-2 rounded-lg hover:bg-red-600 transition"
-              onClick={() => {
-                handleLogout();
-                setOpen(false);
-              }}
+      {/* Mobile Nav Menu */}
+      <AnimatePresence>
+        {open && (
+            <motion.div
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                className="fixed top-20 right-0 h-[calc(100vh-5rem)] w-full bg-card z-40 p-6 flex flex-col"
             >
-              Logout
-            </button>
-          ) : (
-            <>
-              <Link
-                to="/login"
-                className="block bg-white text-blue-700 px-4 py-2 rounded-lg font-semibold text-center hover:bg-gray-100 transition"
-                onClick={() => setOpen(false)}
-              >
-                Login
-              </Link>
-              <Link
-                to="/register"
-                className="block bg-yellow-400 text-blue-900 px-4 py-2 rounded-lg font-semibold text-center hover:bg-yellow-300 transition"
-                onClick={() => setOpen(false)}
-              >
-                Register
-              </Link>
-            </>
-          )}
-        </div>
-      )}
+            <div className="flex-grow flex flex-col items-start gap-4 text-foreground">
+                {user ? (
+                  <>
+                    {allLinks.map((link) => (
+                      <Link
+                        key={link.name}
+                        to={link.path}
+                        className="block py-3 px-3 rounded-lg text-foreground text-xl font-medium hover:bg-secondary w-full text-left"
+                        onClick={() => setOpen(false)}
+                      >
+                        {link.name}
+                      </Link>
+                    ))}
+                     <div className="w-full border-t border-border my-4"></div>
+                     {commonProfileLinks.map(link => (
+                        <Link
+                          key={link.path}
+                          to={link.path}
+                          className="block py-3 px-3 rounded-lg text-foreground text-xl font-medium hover:bg-secondary w-full text-left"
+                          onClick={() => setOpen(false)}
+                        >
+                          {link.name}
+                        </Link>
+                      ))}
+                    <button
+                      className="bg-destructive text-destructive-foreground w-full py-3 rounded-lg hover:opacity-90 transition text-xl font-medium mt-auto"
+                      onClick={() => {
+                        handleLogout();
+                        setOpen(false);
+                      }}
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <div className="w-full flex flex-col h-full">
+                    <Link
+                      to="/about"
+                      className="block py-3 px-3 rounded-lg text-foreground text-xl font-medium hover:bg-secondary w-full text-left"
+                      onClick={() => setOpen(false)}
+                    >
+                      About
+                    </Link>
+                    <div className="mt-auto w-full space-y-2">
+                        <Link
+                        to="/login"
+                        className="block text-center border border-primary text-primary px-4 py-3 rounded-lg font-semibold hover:bg-primary hover:text-primary-foreground transition w-full text-lg"
+                        onClick={() => setOpen(false)}
+                        >
+                        Login
+                        </Link>
+                        <Link
+                        to="/register"
+                        className="block bg-primary text-primary-foreground px-4 py-3 rounded-lg font-semibold text-center hover:opacity-90 transition w-full text-lg"
+                        onClick={() => setOpen(false)}
+                        >
+                        Register
+                        </Link>
+                    </div>
+                  </div>
+                )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 }
