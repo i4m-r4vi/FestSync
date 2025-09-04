@@ -103,6 +103,7 @@ export const confirmPayment = async (req, res) => {
       return res.status(401).json({ error: "Please login first." });
     }
 
+    // 1. Get the Stripe session
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
     if (session.payment_status !== "paid") {
@@ -111,6 +112,7 @@ export const confirmPayment = async (req, res) => {
 
     const { eventId, subEvent } = session.metadata;
 
+    // 2. Fetch event and user
     const getEvent = await EventModel.findById(eventId);
     const userReg = await UserAuth.findById(user._id);
 
@@ -118,32 +120,54 @@ export const confirmPayment = async (req, res) => {
       return res.status(404).json({ error: "Event or user not found." });
     }
 
-    const alreadyRegistered = userReg.registeredEvents.some(
+    // 3. Check if user already registered
+    const alreadyRegisteredUser = userReg.registeredEvents.some(
       (el) => el.eventId.toString() === eventId
     );
-    if (alreadyRegistered) {
-      return res.status(400).json({ error: "User already registered for the event." });
+    const alreadyRegisteredEvent = getEvent.registeredUsers.some(
+      (el) => el.userId.toString() === user._id.toString()
+    );
+
+    if (alreadyRegisteredUser || alreadyRegisteredEvent) {
+      return res
+        .status(200)
+        .json({ message: "User already registered for the event." });
     }
-    userReg.registeredEvents.push({
-      eventId,
-      eventName: getEvent.title,
-      subEvent,
-      eventDate: getEvent.EventDate,
-    });
 
-    getEvent.registeredUsers.push({
-      userId: user._id,
-      name: user.fullname,
-      eventName: getEvent.title,
-      mail: user.email,
-      subEvent,
-      eventDate: getEvent.EventDate,
-    });
+    // 4. Add registration safely using $addToSet
+    await UserAuth.updateOne(
+      { _id: user._id },
+      {
+        $addToSet: {
+          registeredEvents: {
+            eventId,
+            eventName: getEvent.title,
+            subEvent,
+            eventDate: getEvent.EventDate,
+          },
+        },
+      }
+    );
 
-    await userReg.save();
-    await getEvent.save();
+    await EventModel.updateOne(
+      { _id: eventId },
+      {
+        $addToSet: {
+          registeredUsers: {
+            userId: user._id,
+            name: user.fullname,
+            eventName: getEvent.title,
+            mail: user.email,
+            subEvent,
+            eventDate: getEvent.EventDate,
+          },
+        },
+      }
+    );
 
-    return res.status(200).json({ message: "Registration confirmed successfully." });
+    return res
+      .status(200)
+      .json({ message: "Registration confirmed successfully." });
   } catch (err) {
     console.error("Error in confirmPayment:", err);
     return res.status(500).json({ error: "Internal server error." });
