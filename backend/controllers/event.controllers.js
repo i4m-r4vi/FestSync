@@ -1,3 +1,4 @@
+import UserAuth from "../models/auth.models.js";
 import EventModel from "../models/event.models.js";
 import cloudinary from "cloudinary"
 
@@ -125,15 +126,45 @@ export const updateEvent = async (req, res) => {
 
 export const getRegistredUsers = async (req, res) => {
     try {
-        
+
         const event = await EventModel.find().select("title department registeredUsers EventDate").populate("registeredUsers.userId", "fullname email clgName");
-        
+
         if (!event) return res.status(404).json({ message: "Event not found" });
-        res.status(200).json({events:event})
+        res.status(200).json({ events: event })
     } catch (error) {
         console.error(`Error in getRegistredUsers : ${error}`);
         res.status(500).json({ error: "Internal server error." });
     }
 }
+export const getRegistredEvents = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const user = await UserAuth.findById(id).populate("registeredEvents.eventId");
+
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        // Filter registeredUsers so only current user's data is shown
+        const filteredEvents = user.registeredEvents.map((regEvent) => {
+            const event = regEvent.eventId.toObject();
+            event.registeredUsers = event.registeredUsers.filter(
+                (u) => u.userId.toString() === id
+            );
+
+            return {
+                ...regEvent.toObject(),
+                eventId: event,
+            };
+        });
+
+        res.status(200).json({
+            registeredEvents: filteredEvents,
+        });
+    } catch (error) {
+        console.error(`Error in getRegisteredEvents : ${error}`);
+        res.status(500).json({ error: "Internal server error." });
+    }
+};
+
 
 
