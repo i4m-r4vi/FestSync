@@ -84,8 +84,8 @@ export const forgotPassowrdRequest = async (req, res) => {
         const resetUrl = `${process.env.BACKEND_URL}/api/auth/forgotPassword/${user._id}/${token}`
         const transporter = await nodemailer.createTransport({
             host: 'smtp.gmail.com',
-            port: 465,
-            secure: true,
+            port: 587,
+            secure: false,
             auth: {
                 user: `${process.env.EMAIL}`,
                 pass: `${process.env.PASS}`
