@@ -110,14 +110,10 @@ export const forgotPassowrdRequest = async (req, res) => {
       <p style="font-size: 12px; color: #888;">If you did not request this, please ignore this email. Your password will remain unchanged.</p>
     </div>
   `     };
-        await transporter.sendMail(msgOptions, (err, info) => {
-            if (err) {
-                console.log(err);
-                return;
-            }
-            res.status(200).json({ message: `Password reset link sent` });
-            transporter.close();
-        })
+
+        const info = await transporter.sendMail(msgOptions);
+
+        res.status(200).json({ message: "Password reset link sent", info });
     } catch (error) {
         console.error("Error occurred during forgotPasswordRequest:", error);
         res.status(500).json({ message: "Internal server error." });
