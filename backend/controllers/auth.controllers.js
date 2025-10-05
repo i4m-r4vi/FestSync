@@ -86,7 +86,6 @@ export const forgotPassowrdRequest = async (req, res) => {
       return res.status(404).json({ message: "User not found." });
     }
 
-    // Create a token
     const secret = user._id + process.env.JWT_SECRET;
     const token = jwt.sign(
       { id: user._id, email: user.email, fullname: user.fullname },
@@ -94,33 +93,42 @@ export const forgotPassowrdRequest = async (req, res) => {
       { expiresIn: "10m" }
     );
 
-    // Create reset URL
     const resetUrl = `${process.env.BACKEND_URL}/api/auth/forgotPassword/${user._id}/${token}`;
 
-    // Email content
-    const msg = {
+
+    const transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com", 
+      port: 587, 
+      secure: false, 
+      auth: {
+        user: process.env.EMAIL, 
+        pass: process.env.PASS, 
+      },
+    });
+
+    const mailOptions = {
+      from: `"Support" <${process.env.SMTP_USER}>`,
       to: user.email,
-      from: process.env.EMAIL, // verified sender on SendGrid
       subject: "Password Reset Request",
       html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
-        <h2 style="color: #333;">Password Reset Request</h2>
-        <p>Hello ${user.fullname || 'User'},</p>
-        <p>You are receiving this email because you (or someone else) requested a password reset for your account.</p>
-        <p>Please click the button below to reset your password. This link will expire in 10 minutes.</p>
-        <p style="text-align: center;">
-          <a href="${resetUrl}" style="display: inline-block; padding: 12px 20px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 5px;">Reset Password</a>
-        </p>
-        <p>If the button doesn't work, copy and paste this URL into your browser:</p>
-        <p style="word-break: break-all;"><a href="${resetUrl}">${resetUrl}</a></p>
-        <hr style="margin: 30px 0;">
-        <p style="font-size: 12px; color: #888;">If you did not request this, please ignore this email. Your password will remain unchanged.</p>
-      </div>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+          <h2 style="color: #333;">Password Reset Request</h2>
+          <p>Hello ${user.fullname || "User"},</p>
+          <p>You are receiving this email because you (or someone else) requested a password reset for your account.</p>
+          <p>Please click the button below to reset your password. This link will expire in 10 minutes.</p>
+          <p style="text-align: center;">
+            <a href="${resetUrl}" style="display: inline-block; padding: 12px 20px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 5px;">Reset Password</a>
+          </p>
+          <p>If the button doesn't work, copy and paste this URL into your browser:</p>
+          <p style="word-break: break-all;"><a href="${resetUrl}">${resetUrl}</a></p>
+          <hr style="margin: 30px 0;">
+          <p style="font-size: 12px; color: #888;">If you did not request this, please ignore this email. Your password will remain unchanged.</p>
+        </div>
       `,
     };
 
-    // Send email
-    await sgMail.send(msg);
+
+    await transporter.sendMail(mailOptions);
 
     res.status(200).json({ message: "Password reset link sent" });
   } catch (error) {
@@ -134,7 +142,7 @@ export const updatePassowrd = async (req, res) => {
         const { id, token } = req.params;
         const { newPassword } = req.body;
         const user = await UserAuth.findOne({ _id: id })
-        const secret = user._id + process.env.jwtsecret;
+        const secret = user._id + process.env.JWT_SECRET;
         try {
             jwt.verify(token, secret)
         } catch (error) {
@@ -154,7 +162,7 @@ export const getForgotPassword = async (req, res) => {
     try {
         const { id, token } = req.params;
         const user = await UserAuth.findOne({ _id: id })
-        const secret = user._id + process.env.jwtsecret;
+        const secret = user._id + process.env.JWT_SECRET;
         try {
             jwt.verify(token, secret)
         } catch (error) {
