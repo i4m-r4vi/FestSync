@@ -1,4 +1,3 @@
-// src/pages/Home.js
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { useQuery } from "@tanstack/react-query";
@@ -47,7 +46,6 @@ export default function Home() {
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
 
-      {/* Hero Section */}
       <header className="flex flex-col items-center justify-center text-center relative h-screen">
         <div className="container mx-auto px-6">
           <motion.div
@@ -99,11 +97,10 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Features Section */}
       <section className="py-20 px-6 bg-secondary dark:bg-slate-900">
         <div className="container mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-foreground">
-              Why Choose FestSync?
+              Why Choose FestSync AI?
             </h2>
             <div className="grid gap-8 md:grid-cols-3 max-w-6xl mx-auto">
               {features.map((feature, i) => (
@@ -129,11 +126,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="bg-background border-t border-border text-center py-6">
         <div className="container mx-auto">
             <p className="text-muted-foreground">
-            © {new Date().getFullYear()} FestSync. All rights reserved.
+            © {new Date().getFullYear()} FestSync AI. All rights reserved.
             </p>
         </div>
       </footer>

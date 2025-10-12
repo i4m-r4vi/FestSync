@@ -4,7 +4,6 @@ import Navbar from "../../components/Navbar";
 import { Loader2, Calendar } from "lucide-react";
 
 export default function RegisteredEvents() {
-  // ✅ Get logged-in user first
   const {
     data: user,
     isLoading: userLoading,
@@ -13,11 +12,10 @@ export default function RegisteredEvents() {
     queryKey: ["authUser"],
     queryFn: async () => {
       const { data } = await axiosInstance.get("/auth/profile");
-      return data.userInfo; // should include _id
+      return data.userInfo;
     },
   });
 
-  // ✅ Get registered events for that user
   const {
     data: registrations,
     isLoading: regLoading,
@@ -30,7 +28,7 @@ export default function RegisteredEvents() {
       );
       return data.registeredEvents;
     },
-    enabled: !!user, // wait until user is loaded
+    enabled: !!user,
   });
 
   if (userLoading || regLoading) {
@@ -73,7 +71,6 @@ export default function RegisteredEvents() {
                 key={reg._id}
                 className="bg-card border border-border rounded-xl shadow-sm overflow-hidden flex flex-col"
               >
-                {/* Event Poster */}
                 <div className="h-48 overflow-hidden">
                   <img
                     src={reg.eventId?.postureImg}
@@ -82,7 +79,6 @@ export default function RegisteredEvents() {
                   />
                 </div>
 
-                {/* Event Info */}
                 <div className="p-5 flex-1 flex flex-col">
                   <h3 className="text-xl font-bold text-foreground mb-2">
                     {reg.eventId?.title}

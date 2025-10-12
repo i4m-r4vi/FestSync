@@ -1,4 +1,3 @@
-// src/pages/student/Profile.jsx
 import Navbar from "../../components/Navbar";
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "../../utils/axiosInstance";
@@ -6,7 +5,7 @@ import { Loader2 } from "lucide-react";
 
 export default function Profile() {
   const { data: user, isLoading, isError } = useQuery({
-    queryKey: ["authUser"], // ✅ unified query key
+    queryKey: ["authUser"],
     queryFn: async () => {
       const { data } = await axiosInstance.get("/auth/profile");
       return data.userInfo;
@@ -34,7 +33,6 @@ export default function Profile() {
       <Navbar />
       <main className="container mx-auto px-6 pt-28">
         <div className="bg-card border border-border shadow-lg rounded-xl p-6 w-full max-w-md mx-auto text-center">
-          {/* Default Avatar */}
           <div className="w-24 h-24 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-4 border-4 border-card">
             <span className="text-3xl font-bold text-primary">
               {user.fullname ? user.fullname.charAt(0).toUpperCase() : "U"}

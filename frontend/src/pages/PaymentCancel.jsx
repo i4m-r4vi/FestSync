@@ -1,4 +1,3 @@
-// src/pages/PaymentCancel.js
 import { Link } from "react-router-dom";
 
 export default function PaymentCancel() {

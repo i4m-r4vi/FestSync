@@ -1,4 +1,3 @@
-// src/components/Modal.js
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, XCircle, AlertTriangle, Loader } from 'lucide-react';
 

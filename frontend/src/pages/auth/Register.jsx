@@ -1,4 +1,3 @@
-// src/pages/auth/Register.js
 import { useState } from "react";
 import axiosInstance from "../../utils/axiosInstance";
 import { Link, useNavigate } from "react-router-dom";
@@ -34,7 +33,7 @@ export default function Register() {
         type: "success",
         message: "Registration successful! Redirecting...",
       });
-      queryClient.setQueryData(["authUser"], data.data.user); // pre-populate user data
+      queryClient.setQueryData(["authUser"], data.data.user);
       setTimeout(() => {
         if (data.data.user.role === "student") {
           navigate("/student/events");
@@ -83,7 +82,7 @@ export default function Register() {
           <h2 className="text-3xl font-bold mb-2 text-center text-foreground">
             Create an Account
           </h2>
-          <p className="text-center text-muted-foreground mb-6">Join FestSync to manage and attend events.</p>
+          <p className="text-center text-muted-foreground mb-6">Join FestSync AI to manage and attend events.</p>
 
           <div className="mb-4">
             <label className="block text-foreground/80 mb-2" htmlFor="fullname">Full Name</label>

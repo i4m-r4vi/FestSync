@@ -15,7 +15,7 @@ import "./App.css";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2Icon } from "lucide-react";
-import axiosInstance from "./utils/axiosInstance"; // ✅ cookie-based axios
+import axiosInstance from "./utils/axiosInstance";
 import PaymentCancel from "./pages/PaymentCancel";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import About from "./pages/About";
@@ -24,13 +24,12 @@ import RegisteredEvents from "./pages/student/RegisteredEvents";
 const stripePromise = loadStripe(import.meta.env.VITE_Stripe_Publishable_key);
 
 function App() {
-  // ✅ Check session from backend
   const { data: authUser, isLoading } = useQuery({
     queryKey: ["authUser"],
     queryFn: async () => {
       try {
         const res = await axiosInstance.get("/auth/profile");
-        return res.data.userInfo; // { fullname, email, role }
+        return res.data.userInfo;
       } catch (error) {
         return null;
       }
@@ -49,11 +48,9 @@ function App() {
   return (
     <Elements stripe={stripePromise}>
       <Routes>
-        {/* Public Home */}
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
 
-        {/* Auth Pages → redirect role-based if logged in */}
         <Route
           path="/login"
           element={
@@ -87,7 +84,6 @@ function App() {
           element={<ForgotPassword/>}
         />
 
-        {/* Student Protected Routes */}
         <Route
           path="/student/profile"
           element={
@@ -139,7 +135,6 @@ function App() {
           }
         />
 
-        {/* Admin Protected Routes */}
         <Route
           path="/admin/participants"
           element={
@@ -181,7 +176,6 @@ function App() {
           }
         />
 
-        {/* Not Found */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Elements>

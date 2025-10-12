@@ -1,4 +1,3 @@
-// src/components/Navbar.js
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, User, LogOut, Settings, LayoutDashboard, Sun, Moon, CalendarCheck } from "lucide-react";
@@ -67,7 +66,6 @@ export default function Navbar() {
             <Logo />
         </Link>
 
-        {/* Desktop Nav */}
         <div className="hidden md:flex items-center space-x-8">
           {allLinks.map((link) => (
               <Link
@@ -151,7 +149,6 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Mobile Nav Button */}
         <div className="md:hidden flex items-center">
             <motion.button
               onClick={toggleTheme}
@@ -172,7 +169,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Nav Menu */}
       <AnimatePresence>
         {open && (
             <motion.div

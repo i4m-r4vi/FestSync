@@ -1,4 +1,3 @@
-// src/pages/student/PaymentSuccess.jsx
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axiosInstance from "../utils/axiosInstance";
@@ -10,7 +9,6 @@ export default function PaymentSuccess() {
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState("");
 
-  // Read query params from Stripe redirect
   const query = new URLSearchParams(location.search);
   const sessionId = query.get("session_id");
   const eventId = query.get("eventId");
@@ -25,7 +23,6 @@ export default function PaymentSuccess() {
           return;
         }
 
-        // ✅ Call the correct backend endpoint
         const res = await axiosInstance.post("/payment/confirm-registration", {
           sessionId,
         });
@@ -34,7 +31,6 @@ export default function PaymentSuccess() {
 
         if (res.status === 200) {
           setStatus("Registration confirmed! 🎉 Please Wait few Second");
-          // Optional redirect to "My Registrations" after a delay
           setTimeout(() => navigate("/student/registered-events"), 2000);
         } else {
           setStatus(res.data.error || "Payment not verified.");

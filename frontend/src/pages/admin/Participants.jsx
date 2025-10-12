@@ -1,4 +1,3 @@
-// src/pages/admin/Participants.jsx
 import { useEffect, useState } from "react";
 import axiosInstance from "../../utils/axiosInstance";
 import Navbar from "../../components/Navbar";
@@ -10,7 +9,7 @@ export default function Participants() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openEvent, setOpenEvent] = useState(null);
-  const [sending, setSending] = useState(null); // track sending eventId
+  const [sending, setSending] = useState(null);
   const [modalState, setModalState] = useState({
     isOpen: false,
     type: "success",
@@ -78,7 +77,6 @@ export default function Participants() {
           <div className="space-y-4">
             {events.map((event) => (
               <div key={event._id} className="border border-border rounded-lg shadow-sm bg-card">
-                {/* Accordion Header */}
                 <button
                   onClick={() =>
                     setOpenEvent(openEvent === event._id ? null : event._id)
@@ -91,7 +89,6 @@ export default function Participants() {
                   <span>{openEvent === event._id ? "▲" : "▼"}</span>
                 </button>
 
-                {/* Accordion Content */}
                 {openEvent === event._id && (
                   <div className="p-4">
                     {event.registeredUsers.length === 0 ? (
@@ -110,7 +107,6 @@ export default function Participants() {
                           </button>
                         </div>
 
-                        {/* Table for desktop */}
                         <div className="hidden md:block overflow-x-auto">
                           <table className="w-full bg-card rounded-lg">
                             <thead className="bg-secondary">
@@ -138,7 +134,6 @@ export default function Participants() {
                           </table>
                         </div>
 
-                        {/* Cards for mobile */}
                         <div className="grid gap-4 md:hidden mt-4">
                           {event.registeredUsers.map((u) => (
                             <div

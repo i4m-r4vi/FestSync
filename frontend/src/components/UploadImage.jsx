@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState } from "react";
-import { X } from "lucide-react"; // ❌ icon from lucide-react (or you can use any svg)
+import { useEffect, useRef } from "react";
+import { X, UploadCloud } from "lucide-react";
 
-export default function UploadImage({ addBtn,onUpload }) {
+export default function UploadImage({ addBtn, onUpload, image, setImage }) {
   const fileInputRef = useRef(null);
-  const [image, setImage] = useState(null);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -11,24 +10,29 @@ export default function UploadImage({ addBtn,onUpload }) {
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setImage(reader.result);
-      onUpload(reader.result); // ✅ base64 string
+      const result = reader.result;
+      setImage(result);
+      onUpload(result);
     };
-    reader.readAsDataURL(file); // convert to base64
+    reader.readAsDataURL(file);
   };
 
   const handleRemoveImage = () => {
     setImage(null);
-    onUpload(null); // clear in parent also
-    fileInputRef.current.value = ""; // reset input
+    onUpload(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
-  useEffect(()=>{
-    setImage(null)
-  },[addBtn])
-
+  useEffect(() => {
+    if (addBtn) {
+        setImage(null);
+    }
+  }, [addBtn, setImage]);
+  
   return (
-    <div>
+    <div className="flex-shrink-0">
       <input
         type="file"
         accept="image/*"
@@ -37,30 +41,35 @@ export default function UploadImage({ addBtn,onUpload }) {
         className="hidden"
       />
 
-      {image && (
-        <div className="relative inline-block">
-          <img
-            src={image}
-            alt="Uploaded"
-            className="w-40 h-40 rounded-lg object-cover"
-          />
-          <button
-            type="button"
-            onClick={handleRemoveImage}
-            className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 shadow-md hover:bg-red-700"
-          >
-            <X size={16} />
-          </button>
-        </div>
-      )}
-
-      <button
-        type="button"
+      <div
+        className="w-40 h-40 rounded-lg border-2 border-dashed border-border flex items-center justify-center text-muted-foreground bg-input/50 cursor-pointer hover:border-primary transition-colors"
         onClick={() => fileInputRef.current.click()}
-        className="px-4 py-2 mt-2 bg-amber-600 text-white rounded-lg block"
       >
-        Upload Image
-      </button>
+        {image ? (
+          <div className="relative w-full h-full">
+            <img
+              src={image}
+              alt="Uploaded"
+              className="w-full h-full rounded-lg object-cover"
+            />
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRemoveImage();
+              }}
+              className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 shadow-md hover:bg-red-700"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        ) : (
+          <div className="text-center p-2">
+            <UploadCloud className="mx-auto mb-2" size={32} />
+            <p className="text-sm">Upload Image</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

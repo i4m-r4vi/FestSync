@@ -1,4 +1,3 @@
-// src/pages/ForgotPassword.js
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axiosInstance";
@@ -67,7 +66,6 @@ export default function ForgotPassword() {
           Send Reset Link
         </button>
 
-        {/* ✅ Back to Home button */}
         <button
           type="button"
           onClick={() => navigate("/")}
@@ -77,7 +75,6 @@ export default function ForgotPassword() {
         </button>
       </form>
 
-      {/* ✅ Modal reuse */}
       <Modal
         isOpen={modal.open}
         type={modal.type}

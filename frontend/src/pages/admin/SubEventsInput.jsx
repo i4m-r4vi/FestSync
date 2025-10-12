@@ -6,7 +6,7 @@ export default function SubEventsInput({ subEvents = [], setSubEvents }) {
 
   const handleAdd = () => {
     if (!subEventInput.trim()) return;
-    if (subEvents.includes(subEventInput.trim())) return; // 🚫 prevent duplicates
+    if (subEvents.includes(subEventInput.trim())) return;
     setSubEvents([...subEvents, subEventInput.trim()]);
     setSubEventInput("");
   };
@@ -17,7 +17,6 @@ export default function SubEventsInput({ subEvents = [], setSubEvents }) {
 
   return (
     <div className="space-y-3">
-      {/* Input + Add Button */}
       <div className="flex gap-2">
         <input
           type="text"
@@ -35,7 +34,6 @@ export default function SubEventsInput({ subEvents = [], setSubEvents }) {
         </button>
       </div>
 
-      {/* Display SubEvents List */}
       <div className="flex flex-wrap gap-2">
         {subEvents.map((sub, index) => (
           <div

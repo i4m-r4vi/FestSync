@@ -1,4 +1,3 @@
-// src/pages/admin/Certificates.js
 import { useEffect, useState } from "react";
 import axiosInstance from "../../utils/axiosInstance";
 import Navbar from "../../components/Navbar";
@@ -10,7 +9,7 @@ export default function AdminCertificates() {
 
   useEffect(() => {
     axiosInstance
-      .get("/admin/participants") // ✅ backend returns registered students
+      .get("/admin/participants")
       .then((res) => setParticipants(res.data))
       .catch((err) => console.error("Error fetching participants:", err))
       .finally(() => setLoading(false));
@@ -47,7 +46,6 @@ export default function AdminCertificates() {
           </div>
         ) : (
           <>
-            {/* Table for desktops */}
             <div className="hidden md:block overflow-x-auto bg-card border border-border rounded-lg shadow-sm">
               <table className="w-full">
                 <thead className="bg-secondary">
@@ -78,7 +76,6 @@ export default function AdminCertificates() {
               </table>
             </div>
 
-            {/* Card layout for mobile */}
             <div className="grid gap-4 md:hidden">
               {participants.map((p) => (
                 <div

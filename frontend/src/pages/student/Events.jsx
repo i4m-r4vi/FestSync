@@ -9,7 +9,7 @@ export default function StudentEvents() {
   const stripe = useStripe();
 
   const [events, setEvents] = useState([]);
-  const [registeredEventIds, setRegisteredEventIds] = useState([]); // ✅ store registered event ids
+  const [registeredEventIds, setRegisteredEventIds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [subEvent, setSubEvent] = useState("");
@@ -19,11 +19,9 @@ export default function StudentEvents() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // ✅ fetch all events
         const eventsRes = await axiosInstance.get("/events/getEvents");
         setEvents(eventsRes.data.getEvents);
 
-        // ✅ fetch registered events of user
         const regRes = await axiosInstance.get("/payment/my-registrations");
         const ids = regRes.data.registrations.map((r) => r.eventId?._id);
         setRegisteredEventIds(ids);
@@ -139,7 +137,6 @@ export default function StudentEvents() {
         )}
       </div>
 
-      {/* ✅ Modal only for new registration */}
       <AnimatePresence>
         {selectedEvent && (
           <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">

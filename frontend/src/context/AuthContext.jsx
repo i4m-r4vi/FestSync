@@ -1,21 +1,19 @@
-// src/context/AuthContext.js
 import { createContext, useState, useEffect } from "react";
-import axiosInstance from "../utils/axiosInstance"; // ✅ use your instance
+import axiosInstance from "../utils/axiosInstance";
 
 export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null); // { fullname, email, role, clgName }
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Load user from backend session on app start
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const res = await axiosInstance.get("/auth/profile"); 
-        setUser(res.data); // backend returns safe user info
+        setUser(res.data);
       } catch (err) {
-        setUser(null); // not logged in
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -25,7 +23,6 @@ export function AuthProvider({ children }) {
 
   
 
-  // Logout
   const logout = async () => {
     try {
       await axiosInstance.post("/auth/logout");

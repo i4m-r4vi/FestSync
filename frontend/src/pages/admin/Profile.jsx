@@ -1,4 +1,3 @@
-// src/pages/admin/Profile.jsx
 import Navbar from "../../components/Navbar";
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "../../utils/axiosInstance";
@@ -6,7 +5,7 @@ import { Loader2 } from "lucide-react";
 
 export default function AdminProfile() {
   const { data: user, isLoading, isError } = useQuery({
-    queryKey: ["authUser"], // ✅ unified query key
+    queryKey: ["authUser"],
     queryFn: async () => {
       const { data } = await axiosInstance.get("/auth/profile");
       return data.userInfo;
